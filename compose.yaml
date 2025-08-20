@@ -1,0 +1,48 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    command: ["npx", "expo", "start", "--tunnel"]
+    ports:
+      - "19000:19000"   # Expo DevTools
+      - "19001:19001"   # Metro Bundler (Web)
+      - "19002:19002"   # Expo DevTools (Web UI)
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    command: sh -c "rm -f tmp/pids/server.pid && rails s -p 3001 -b '0.0.0.0'"
+    ports:
+      - "3001:3001"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./backend:/rails
+    depends_on:
+      - db
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      DATABASE_NAME: ${DATABASE_NAME}
+  db:
+    image: mysql:8.0
+    platform: linux/arm64
+    volumes:
+      - db-volume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+
+volumes:
+  db-volume:

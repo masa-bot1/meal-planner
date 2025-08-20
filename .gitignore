@@ -1,0 +1,71 @@
+# Environment
+.env
+
+
+## backend
+# Ignore bundler config.
+backend/bundle
+
+# Ignore all environment files.
+backend/env*
+
+# Ignore all logfiles and tempfiles.
+backend/log/*
+backend/tmp/*
+!/backend/log/.keep
+!/backend/tmp/.keep
+
+# Ignore pidfiles, but keep the directory.
+backend/tmp/pids/*
+!/backend/tmp/pids/
+!/backend/tmp/pids/.keep
+
+# Ignore storage (uploaded files in development and any SQLite databases).
+backend/storage/*
+!/backend/storage/.keep
+backend/tmp/storage/*
+!/backend/tmp/storage/
+!/backend/tmp/storage/.keep
+
+# Ignore master key for decrypting credentials and more.
+backend/config/master.key
+
+
+## frontend
+# dependencies
+frontend/node_modules/
+
+# Expo
+frontend/.expo/
+frontend/dist/
+frontend/web-build/
+frontend/expo-env.d.ts
+
+# Native
+frontend/.kotlin/
+frontend/*.orig.*
+frontend/*.jks
+frontend/*.p8
+frontend/*.p12
+frontend/*.key
+frontend/*.mobileprovision
+
+# Metro
+frontend/.metro-health-check*
+
+# debug
+frontend/npm-debug.*
+frontend/yarn-debug.*
+frontend/yarn-error.*
+
+# macOS
+frontend/.DS_Store
+frontend/*.pem
+
+# local env files
+frontend/.env*.local
+
+# typescript
+frontend/*.tsbuildinfo
+
+frontend/app-example
