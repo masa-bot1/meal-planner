@@ -13,9 +13,13 @@ RUN apt-get update -qq && \
   git \
   libyaml-dev \
   pkg-config \
-  nodejs \
-  yarn \
+  curl \
   && rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Node.js と Yarn をインストール
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+  apt-get install -y nodejs && \
+  npm install -g yarn
 
 # GemfileとGemfile.lockをコピーしてbundle install
 COPY Gemfile Gemfile.lock ./
