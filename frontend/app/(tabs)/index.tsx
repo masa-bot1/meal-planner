@@ -7,11 +7,10 @@ import {
   Chip,
   Switch,
   TextInput,
-  Appbar
 } from 'react-native-paper';
 import { useState } from 'react';
+import { router } from 'expo-router';
 
-import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
 import MealPlannerHeaderImage from '@/components/MealPlannerHeaderImage';
@@ -25,64 +24,70 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: '#E8F5E8', dark: '#1B5E20' }}
       headerImage={<MealPlannerHeaderImage />}>
 
-      {/* Card Example */}
-      <Card style={styles.card}>
-        <Card.Title title="Card タイトル" subtitle="Card サブタイトル" />
-        <Card.Content>
-          <Text variant="bodyMedium">
-            これはReact Native Paperのカードコンポーネントです。Material Design 3に基づいたデザインです。
+      {/* 食材カテゴリカード */}
+      <Card style={styles.categoryCard}>
+        <Card.Title
+          title="食材カテゴリ"
+          subtitle="食材を種類別に管理しましょう"
+          titleStyle={styles.cardTitle}
+        />
+        <Card.Content style={styles.categoryContent}>
+          <Text variant="bodyMedium" style={styles.categoryDescription}>
+            食材を分類して効率的に管理できます
           </Text>
+
+          <ThemedView style={styles.categoryButtons}>
+            <Button
+              mode="contained"
+              icon="food-steak"
+              style={[styles.categoryButton, styles.meatButton]}
+              labelStyle={styles.categoryButtonLabel}
+              onPress={() => {
+                console.log('肉類カテゴリを選択');
+                router.push('/categories/meat');
+              }}
+            >
+              肉類
+            </Button>
+
+            <Button
+              mode="contained"
+              icon="carrot"
+              style={[styles.categoryButton, styles.vegetableButton]}
+              labelStyle={styles.categoryButtonLabel}
+              onPress={() => {
+                console.log('野菜類カテゴリを選択');
+                router.push('/categories/vegetables');
+              }}
+            >
+              野菜類
+            </Button>
+
+            <Button
+              mode="contained"
+              icon="bottle-tonic"
+              style={[styles.categoryButton, styles.seasoningButton]}
+              labelStyle={styles.categoryButtonLabel}
+              onPress={() => {
+                console.log('調味料・その他カテゴリを選択');
+                router.push('/categories/seasoning');
+              }}
+            >
+              調味料・その他
+            </Button>
+          </ThemedView>
         </Card.Content>
-        <Card.Actions>
-          <Button onPress={() => console.log('キャンセル')}>キャンセル</Button>
-          <Button onPress={() => console.log('OK')}>OK</Button>
-        </Card.Actions>
       </Card>
-
-      {/* Text Input Example */}
-      <TextInput
-        label="テキスト入力"
-        value={textInput}
-        onChangeText={setTextInput}
-        mode="outlined"
-        style={styles.textInput}
-      />
-
-      {/* Switch Example */}
-      <ThemedView style={styles.switchContainer}>
-        <Text variant="bodyMedium">通知を有効にする</Text>
-        <Switch value={switchValue} onValueChange={setSwitchValue} />
-      </ThemedView>
-
-      {/* Chips Example */}
-      <ThemedView style={styles.chipContainer}>
-        <Chip icon="star" onPress={() => console.log('お気に入り')}>
-          お気に入り
-        </Chip>
-        <Chip mode="outlined" onPress={() => console.log('フィルター')}>
-          フィルター
-        </Chip>
-      </ThemedView>
 
       {/* Buttons Example */}
       <ThemedView style={styles.buttonContainer}>
         <Button mode="contained" onPress={() => console.log('Contained button')}>
-          Contained Button
+          選択した食材で献立を作成
         </Button>
         <Button mode="outlined" onPress={() => console.log('Outlined button')}>
-          Outlined Button
-        </Button>
-        <Button mode="text" onPress={() => console.log('Text button')}>
-          Text Button
+          選択した食材で献立を作成
         </Button>
       </ThemedView>
-
-      {/* FAB (Floating Action Button) */}
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        onPress={() => console.log('FAB pressed')}
-      />
     </ParallaxScrollView>
   );
 }
@@ -100,6 +105,51 @@ const styles = StyleSheet.create({
   card: {
     margin: 16,
     marginBottom: 16,
+  },
+  categoryCard: {
+    margin: 16,
+    marginBottom: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#2E7D32',
+  },
+  categoryContent: {
+    paddingTop: 8,
+  },
+  categoryDescription: {
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#666',
+  },
+  categoryButtons: {
+    gap: 12,
+  },
+  categoryButton: {
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  categoryButtonLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  meatButton: {
+    backgroundColor: '#FF5722', // オレンジ（肉類）
+  },
+  vegetableButton: {
+    backgroundColor: '#4CAF50', // 緑（野菜類）
+  },
+  seasoningButton: {
+    backgroundColor: '#673AB7', // 紫（調味料・その他）
   },
   textInput: {
     margin: 16,
