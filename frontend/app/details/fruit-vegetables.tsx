@@ -51,7 +51,7 @@ export default function FruitVegetableDetailScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Appbar.Header style={styles.header}>
+      <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="果菜類" subtitle="種類別詳細情報" />
         <Appbar.Action icon="heart-outline" onPress={() => console.log('お気に入り')} />
@@ -125,9 +125,6 @@ export default function FruitVegetableDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    backgroundColor: '#E91E63',
   },
   scrollView: {
     flex: 1,

@@ -51,7 +51,7 @@ export default function OtherIngredientsDetailScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Appbar.Header style={styles.header}>
+      <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="その他" subtitle="種類別詳細情報" />
         <Appbar.Action icon="heart-outline" onPress={() => console.log('お気に入り')} />
@@ -125,9 +125,6 @@ export default function OtherIngredientsDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    backgroundColor: '#9E9E9E',
   },
   scrollView: {
     flex: 1,

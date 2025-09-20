@@ -45,7 +45,7 @@ export default function OilsDetailScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <Appbar.Header style={styles.header}>
+      <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="油類" subtitle="種類別詳細情報" />
         <Appbar.Action icon="heart-outline" onPress={() => console.log('お気に入り')} />
@@ -119,9 +119,6 @@ export default function OilsDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    backgroundColor: '#FFC107',
   },
   scrollView: {
     flex: 1,
