@@ -5,11 +5,11 @@ import { ThemedView } from '@/components/ThemedView';
 
 export default function VegetableCategoryScreen() {
   const vegetableItems = [
-    { id: 1, name: '根菜類', description: 'にんじん・だいこん・じゃがいもなど', icon: 'carrot' },
-    { id: 2, name: '葉物野菜', description: 'キャベツ・レタス・ほうれん草など', icon: 'leaf' },
-    { id: 3, name: '果菜類', description: 'トマト・きゅうり・なすなど', icon: 'fruit-cherries' },
-    { id: 4, name: 'きのこ類', description: 'しいたけ・えのき・しめじなど', icon: 'mushroom' },
-    { id: 5, name: '豆類', description: '大豆・いんげん・えだまめなど', icon: 'grain' },
+    { id: 1, name: '根菜類', description: 'にんじん・だいこん・じゃがいもなど', icon: 'carrot', route: 'root-vegetables' },
+    { id: 2, name: '葉物野菜', description: 'キャベツ・レタス・ほうれん草など', icon: 'leaf', route: 'leafy-vegetables' },
+    { id: 3, name: '果菜類', description: 'トマト・きゅうり・なすなど', icon: 'fruit-cherries', route: 'fruit-vegetables' },
+    { id: 4, name: 'きのこ類', description: 'しいたけ・えのき・しめじなど', icon: 'mushroom', route: 'mushrooms' },
+    { id: 5, name: '豆類', description: '大豆・いんげん・えだまめなど', icon: 'grain', route: 'beans' },
   ];
 
   return (
@@ -20,19 +20,6 @@ export default function VegetableCategoryScreen() {
         <Appbar.Action icon="plus" onPress={() => console.log('追加')} />
       </Appbar.Header>
 
-      <Card style={styles.categoryCard}>
-        <Card.Title
-          title="🥕 野菜類カテゴリ"
-          subtitle="ビタミン・ミネラル豊富な食材を管理"
-          titleStyle={styles.cardTitle}
-        />
-        <Card.Content>
-          <Text variant="bodyMedium" style={styles.description}>
-            新鮮な野菜や果物などの栄養豊富な食材を効率的に管理できます
-          </Text>
-        </Card.Content>
-      </Card>
-
       <ThemedView style={styles.listContainer}>
         {vegetableItems.map((item) => (
           <List.Item
@@ -41,21 +28,24 @@ export default function VegetableCategoryScreen() {
             description={item.description}
             left={(props) => <List.Icon {...props} icon={item.icon} />}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => console.log(`${item.name}を選択`)}
+            onPress={() => {
+              console.log(`${item.name}の詳細画面に遷移`);
+              router.push(`/details/${item.route}` as any);
+            }}
             style={styles.listItem}
           />
         ))}
-      </ThemedView>
 
-      <ThemedView style={styles.actionContainer}>
-        <Button
-          mode="contained"
-          icon="plus"
-          style={styles.addButton}
-          onPress={() => console.log('新しい野菜を追加')}
-        >
-          新しい食材を追加
-        </Button>
+        <ThemedView style={styles.addButtonContainer}>
+          <Button
+            mode="contained"
+            icon="plus"
+            style={styles.addButton}
+            onPress={() => console.log('新しい野菜を追加')}
+          >
+            新しい食材を追加
+          </Button>
+        </ThemedView>
       </ThemedView>
     </ThemedView>
   );
@@ -96,8 +86,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     elevation: 1,
   },
-  actionContainer: {
-    padding: 16,
+  addButtonContainer: {
+    paddingVertical: 16,
+    paddingHorizontal: 8,
   },
   addButton: {
     backgroundColor: '#4CAF50',

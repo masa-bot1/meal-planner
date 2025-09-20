@@ -3,12 +3,7 @@ import {
   Button,
   Card,
   Text,
-  FAB,
-  Chip,
-  Switch,
-  TextInput,
 } from 'react-native-paper';
-import { useState } from 'react';
 import { router } from 'expo-router';
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -16,9 +11,6 @@ import { ThemedView } from '@/components/ThemedView';
 import MealPlannerHeaderImage from '@/components/MealPlannerHeaderImage';
 
 export default function HomeScreen() {
-  const [switchValue, setSwitchValue] = useState(false);
-  const [textInput, setTextInput] = useState('');
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#E8F5E8', dark: '#1B5E20' }}
@@ -82,9 +74,6 @@ export default function HomeScreen() {
       {/* Buttons Example */}
       <ThemedView style={styles.buttonContainer}>
         <Button mode="contained" onPress={() => console.log('Contained button')}>
-          選択した食材で献立を作成
-        </Button>
-        <Button mode="outlined" onPress={() => console.log('Outlined button')}>
           選択した食材で献立を作成
         </Button>
       </ThemedView>
