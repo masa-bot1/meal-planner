@@ -80,7 +80,6 @@ export default function PorkDetailScreen() {
               title={pork.name}
               description={pork.description}
               left={(props) => <List.Icon {...props} icon={pork.icon} />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => console.log(`${pork.name}の詳細を表示`)}
               style={styles.listItem}
             />

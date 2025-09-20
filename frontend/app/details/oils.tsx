@@ -93,7 +93,6 @@ export default function OilsDetailScreen() {
                 title={oil.name}
                 description={oil.description}
                 left={(props) => <List.Icon {...props} icon={oil.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${oil.name}の詳細を表示`)}
                 style={styles.listItem}
               />

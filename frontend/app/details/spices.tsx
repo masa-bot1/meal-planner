@@ -99,7 +99,6 @@ export default function SpiceDetailScreen() {
                 title={spice.name}
                 description={spice.description}
                 left={(props) => <List.Icon {...props} icon={spice.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${spice.name}の詳細を表示`)}
                 style={styles.listItem}
               />

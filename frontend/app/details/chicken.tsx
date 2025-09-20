@@ -86,7 +86,6 @@ export default function ChickenDetailScreen() {
               title={chicken.name}
               description={chicken.description}
               left={(props) => <List.Icon {...props} icon={chicken.icon} />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={() => console.log(`${chicken.name}の詳細を表示`)}
               style={styles.listItem}
             />

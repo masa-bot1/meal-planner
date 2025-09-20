@@ -99,7 +99,6 @@ export default function FruitVegetableDetailScreen() {
                 title={vegetable.name}
                 description={vegetable.description}
                 left={(props) => <List.Icon {...props} icon={vegetable.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${vegetable.name}の詳細を表示`)}
                 style={styles.listItem}
               />

@@ -105,7 +105,6 @@ export default function FishDetailScreen() {
                 title={fish.name}
                 description={fish.description}
                 left={(props) => <List.Icon {...props} icon={fish.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${fish.name}の詳細を表示`)}
                 style={styles.listItem}
               />

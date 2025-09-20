@@ -94,7 +94,6 @@ export default function BeansDetailScreen() {
                 title={bean.name}
                 description={bean.description}
                 left={(props) => <List.Icon {...props} icon={bean.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${bean.name}の詳細を表示`)}
                 style={styles.listItem}
               />

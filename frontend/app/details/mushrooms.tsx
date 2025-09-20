@@ -94,7 +94,6 @@ export default function MushroomDetailScreen() {
                 title={mushroom.name}
                 description={mushroom.description}
                 left={(props) => <List.Icon {...props} icon={mushroom.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${mushroom.name}の詳細を表示`)}
                 style={styles.listItem}
               />

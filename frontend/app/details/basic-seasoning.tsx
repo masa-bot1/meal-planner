@@ -93,7 +93,6 @@ export default function BasicSeasoningDetailScreen() {
                 title={seasoning.name}
                 description={seasoning.description}
                 left={(props) => <List.Icon {...props} icon={seasoning.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${seasoning.name}の詳細を表示`)}
                 style={styles.listItem}
               />

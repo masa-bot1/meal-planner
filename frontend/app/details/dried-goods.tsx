@@ -93,7 +93,6 @@ export default function DriedGoodsDetailScreen() {
                 title={item.name}
                 description={item.description}
                 left={(props) => <List.Icon {...props} icon={item.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${item.name}の詳細を表示`)}
                 style={styles.listItem}
               />

@@ -73,37 +73,36 @@ export default function BeefDetailScreen() {
               </ThemedView>
             </ThemedView>
           </Card.Content>
-      </Card>
+        </Card>
 
-      <ThemedView style={styles.listContainer}>
-        <Text variant="headlineSmall" style={styles.sectionTitle}>
-          部位別詳細
-        </Text>
+        <ThemedView style={styles.listContainer}>
+          <Text variant="headlineSmall" style={styles.sectionTitle}>
+            部位別詳細
+          </Text>
 
-        {beefTypes.map((beef) => (
-          <Card key={beef.id} style={styles.beefCard}>
-            <List.Item
-              title={beef.name}
-              description={beef.description}
-              left={(props) => <List.Icon {...props} icon={beef.icon} />}
-              right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={() => console.log(`${beef.name}の詳細を表示`)}
-              style={styles.listItem}
-            />
-          </Card>
-        ))}
+          {beefTypes.map((beef) => (
+            <Card key={beef.id} style={styles.beefCard}>
+              <List.Item
+                title={beef.name}
+                description={beef.description}
+                left={(props) => <List.Icon {...props} icon={beef.icon} />}
+                onPress={() => console.log(`${beef.name}の詳細を表示`)}
+                style={styles.listItem}
+              />
+            </Card>
+          ))}
 
-        <ThemedView style={styles.actionContainer}>
-          <Button
-            mode="contained"
-            icon="plus"
-            style={styles.addButton}
-            onPress={() => console.log('新しい牛肉部位を追加')}
-          >
-            カスタム部位を追加
-          </Button>
+          <ThemedView style={styles.actionContainer}>
+            <Button
+              mode="contained"
+              icon="plus"
+              style={styles.addButton}
+              onPress={() => console.log('新しい牛肉部位を追加')}
+            >
+              カスタム部位を追加
+            </Button>
+          </ThemedView>
         </ThemedView>
-      </ThemedView>
       </ScrollView>
     </ThemedView>
   );

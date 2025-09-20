@@ -86,7 +86,6 @@ export default function GroundMeatDetailScreen() {
                 title={meat.name}
                 description={meat.description}
                 left={(props) => <List.Icon {...props} icon={meat.icon} />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
                 onPress={() => console.log(`${meat.name}の詳細を表示`)}
                 style={styles.listItem}
               />
