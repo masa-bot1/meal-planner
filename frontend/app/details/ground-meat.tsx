@@ -2,8 +2,19 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function GroundMeatDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: '肉類' });
+    }
+  };
   const groundMeatTypes = [
     {
       id: 1,
@@ -75,6 +86,8 @@ export default function GroundMeatDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             種類別詳細
@@ -86,8 +99,11 @@ export default function GroundMeatDetailScreen() {
                 title={meat.name}
                 description={meat.description}
                 left={(props) => <List.Icon {...props} icon={meat.icon} />}
-                onPress={() => console.log(`${meat.name}の詳細を表示`)}
-                style={styles.listItem}
+                onPress={() => handleItemPress(meat.name)}
+                style={[
+                  styles.listItem,
+                  isSelected(meat.name) && styles.selectedItem
+                ]}
               />
             </Card>
           ))}
@@ -209,5 +225,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#8D6E63',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

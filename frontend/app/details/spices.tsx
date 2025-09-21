@@ -2,8 +2,19 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function SpiceDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: 'スパイス・香辛料' });
+    }
+  };
   const spices = [
     {
       id: 1,
@@ -88,6 +99,8 @@ export default function SpiceDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             種類別詳細
@@ -99,8 +112,11 @@ export default function SpiceDetailScreen() {
                 title={spice.name}
                 description={spice.description}
                 left={(props) => <List.Icon {...props} icon={spice.icon} />}
-                onPress={() => console.log(`${spice.name}の詳細を表示`)}
-                style={styles.listItem}
+                onPress={() => handleItemPress(spice.name)}
+                style={[
+                  styles.listItem,
+                  isSelected(spice.name) && styles.selectedItem
+                ]}
               />
             </Card>
           ))}
@@ -189,5 +205,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#FF5722',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

@@ -2,8 +2,20 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function ChickenDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: '肉類' });
+    }
+  };
+
   const chickenTypes = [
     {
       id: 1,
@@ -75,6 +87,8 @@ export default function ChickenDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             部位別詳細
@@ -86,8 +100,11 @@ export default function ChickenDetailScreen() {
               title={chicken.name}
               description={chicken.description}
               left={(props) => <List.Icon {...props} icon={chicken.icon} />}
-              onPress={() => console.log(`${chicken.name}の詳細を表示`)}
-              style={styles.listItem}
+              onPress={() => handleItemPress(chicken.name)}
+              style={[
+                styles.listItem,
+                isSelected(chicken.name) && styles.selectedItem
+              ]}
             />
           </Card>
         ))}
@@ -209,5 +226,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#F57C00',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

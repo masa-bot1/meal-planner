@@ -2,8 +2,20 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
-export default function BeansDetailScreen() {
+export default function BeanDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: '豆類' });
+    }
+  };
+
   const beans = [
     {
       id: 1,
@@ -83,6 +95,8 @@ export default function BeansDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             種類別詳細
@@ -94,8 +108,11 @@ export default function BeansDetailScreen() {
                 title={bean.name}
                 description={bean.description}
                 left={(props) => <List.Icon {...props} icon={bean.icon} />}
-                onPress={() => console.log(`${bean.name}の詳細を表示`)}
-                style={styles.listItem}
+                onPress={() => handleItemPress(bean.name)}
+                style={[
+                  styles.listItem,
+                  isSelected(bean.name) && styles.selectedItem
+                ]}
               />
             </Card>
           ))}
@@ -184,5 +201,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#795548',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

@@ -2,8 +2,19 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function FishDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: '魚類' });
+    }
+  };
   const fishTypes = [
     {
       id: 1,
@@ -94,6 +105,8 @@ export default function FishDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             種類別詳細
@@ -105,8 +118,11 @@ export default function FishDetailScreen() {
                 title={fish.name}
                 description={fish.description}
                 left={(props) => <List.Icon {...props} icon={fish.icon} />}
-                onPress={() => console.log(`${fish.name}の詳細を表示`)}
-                style={styles.listItem}
+                onPress={() => handleItemPress(fish.name)}
+                style={[
+                  styles.listItem,
+                  isSelected(fish.name) && styles.selectedItem
+                ]}
               />
             </Card>
           ))}
@@ -250,5 +266,8 @@ const styles = StyleSheet.create({
   },
   seasonButton: {
     borderColor: '#4FC3F7',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

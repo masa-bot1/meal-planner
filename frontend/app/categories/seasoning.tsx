@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { Appbar, Card, Text, Button, List } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function SeasoningCategoryScreen() {
   const seasoningItems = [
@@ -19,6 +20,8 @@ export default function SeasoningCategoryScreen() {
         <Appbar.Content title="調味料・その他" subtitle="料理の味付けアイテム" />
         <Appbar.Action icon="plus" onPress={() => console.log('追加')} />
       </Appbar.Header>
+
+      <SelectedItemsDisplay />
 
       <ThemedView style={styles.listContainer}>
         {seasoningItems.map((item) => (

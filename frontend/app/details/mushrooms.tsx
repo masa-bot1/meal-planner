@@ -2,8 +2,19 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function MushroomDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: 'きのこ類' });
+    }
+  };
   const mushrooms = [
     {
       id: 1,
@@ -83,6 +94,8 @@ export default function MushroomDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             種類別詳細
@@ -94,8 +107,11 @@ export default function MushroomDetailScreen() {
                 title={mushroom.name}
                 description={mushroom.description}
                 left={(props) => <List.Icon {...props} icon={mushroom.icon} />}
-                onPress={() => console.log(`${mushroom.name}の詳細を表示`)}
-                style={styles.listItem}
+                onPress={() => handleItemPress(mushroom.name)}
+                style={[
+                  styles.listItem,
+                  isSelected(mushroom.name) && styles.selectedItem
+                ]}
               />
             </Card>
           ))}
@@ -184,5 +200,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#8D6E63',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

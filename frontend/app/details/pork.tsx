@@ -2,8 +2,20 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function PorkDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: '豚肉' });
+    }
+  };
+
   const porkTypes = [
     {
       id: 1,
@@ -69,6 +81,8 @@ export default function PorkDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             部位別詳細
@@ -80,8 +94,11 @@ export default function PorkDetailScreen() {
               title={pork.name}
               description={pork.description}
               left={(props) => <List.Icon {...props} icon={pork.icon} />}
-              onPress={() => console.log(`${pork.name}の詳細を表示`)}
-              style={styles.listItem}
+              onPress={() => handleItemPress(pork.name)}
+              style={[
+                styles.listItem,
+                isSelected(pork.name) && styles.selectedItem
+              ]}
             />
           </Card>
         ))}
@@ -203,5 +220,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#E91E63',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

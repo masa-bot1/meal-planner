@@ -2,8 +2,19 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function BasicSeasoningDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: '調味料' });
+    }
+  };
   const basicSeasonings = [
     {
       id: 1,
@@ -82,6 +93,8 @@ export default function BasicSeasoningDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             種類別詳細
@@ -93,8 +106,11 @@ export default function BasicSeasoningDetailScreen() {
                 title={seasoning.name}
                 description={seasoning.description}
                 left={(props) => <List.Icon {...props} icon={seasoning.icon} />}
-                onPress={() => console.log(`${seasoning.name}の詳細を表示`)}
-                style={styles.listItem}
+                onPress={() => handleItemPress(seasoning.name)}
+                style={[
+                  styles.listItem,
+                  isSelected(seasoning.name) && styles.selectedItem
+                ]}
               />
             </Card>
           ))}
@@ -183,5 +199,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#673AB7',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

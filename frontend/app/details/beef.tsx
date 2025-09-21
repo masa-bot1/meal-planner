@@ -2,8 +2,20 @@ import { StyleSheet, ScrollView } from 'react-native';
 import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function BeefDetailScreen() {
+  const { addItem, removeItem, isSelected } = useSelectedItems();
+
+  const handleItemPress = (itemName: string) => {
+    if (isSelected(itemName)) {
+      removeItem(itemName);
+    } else {
+      addItem({ name: itemName, category: '牛肉' });
+    }
+  };
+
   const beefTypes = [
     {
       id: 1,
@@ -75,6 +87,8 @@ export default function BeefDetailScreen() {
           </Card.Content>
         </Card>
 
+        <SelectedItemsDisplay />
+
         <ThemedView style={styles.listContainer}>
           <Text variant="headlineSmall" style={styles.sectionTitle}>
             部位別詳細
@@ -86,8 +100,11 @@ export default function BeefDetailScreen() {
                 title={beef.name}
                 description={beef.description}
                 left={(props) => <List.Icon {...props} icon={beef.icon} />}
-                onPress={() => console.log(`${beef.name}の詳細を表示`)}
-                style={styles.listItem}
+                onPress={() => handleItemPress(beef.name)}
+                style={[
+                  styles.listItem,
+                  isSelected(beef.name) && styles.selectedItem
+                ]}
               />
             </Card>
           ))}
@@ -209,5 +226,31 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#FF5722',
+  },
+  selectedCard: {
+    margin: 16,
+    marginTop: 0,
+    elevation: 3,
+    backgroundColor: '#E8F5E8',
+  },
+  selectedTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#2E7D32',
+  },
+  selectedContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  selectedChip: {
+    backgroundColor: '#4CAF50',
+  },
+  selectedChipText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  selectedItem: {
+    backgroundColor: '#E8F5E8',
   },
 });

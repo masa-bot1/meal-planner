@@ -9,12 +9,16 @@ import { router } from 'expo-router';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
 import MealPlannerHeaderImage from '@/components/MealPlannerHeaderImage';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function HomeScreen() {
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#E8F5E8', dark: '#1B5E20' }}
       headerImage={<MealPlannerHeaderImage />}>
+
+      {/* 選択中の食材表示 */}
+      <SelectedItemsDisplay />
 
       {/* 食材カテゴリカード */}
       <Card style={styles.categoryCard}>

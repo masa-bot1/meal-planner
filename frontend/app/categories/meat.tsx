@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { Appbar, Button, List } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
+import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 
 export default function MeatCategoryScreen() {
   const meatItems = [
@@ -19,6 +20,8 @@ export default function MeatCategoryScreen() {
         <Appbar.Content title="肉類" subtitle="お肉・魚類の管理" />
         <Appbar.Action icon="plus" onPress={() => console.log('追加')} />
       </Appbar.Header>
+
+      <SelectedItemsDisplay />
 
       <ThemedView style={styles.listContainer}>
         {meatItems.slice(0, 5).map((item) => (
