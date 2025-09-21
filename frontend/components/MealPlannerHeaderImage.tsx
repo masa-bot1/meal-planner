@@ -12,18 +12,6 @@ export default function MealPlannerHeaderImage() {
         <Text style={styles.emoji}>🍛</Text>
       </View>
 
-      <View style={styles.secondRow}>
-        <Text style={styles.emoji}>🥘</Text>
-        <Text style={styles.emoji}>🍳</Text>
-      </View>
-
-      <View style={styles.thirdRow}>
-        <Text style={styles.emoji}>🥕</Text>
-        <Text style={styles.emoji}>🍅</Text>
-        <Text style={styles.emoji}>🧄</Text>
-        <Text style={styles.emoji}>🌶️</Text>
-      </View>
-
       {/* アプリタイトル */}
       <View style={styles.titleContainer}>
         <Text style={styles.title}>献立くん</Text>
