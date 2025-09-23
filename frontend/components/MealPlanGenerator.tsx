@@ -68,9 +68,8 @@ export function MealPlanGenerator() {
     }
   };
 
-  if (selectedItems.length === 0) {
-    return null;
-  }
+  // 食材が選択されているかどうかをチェック
+  const hasSelectedItems = selectedItems.length > 0;
 
   return (
     <Card style={styles.card}>
@@ -84,9 +83,12 @@ export function MealPlanGenerator() {
           <Button
             mode="contained"
             onPress={generateMealPlan}
-            disabled={isGenerating}
+            disabled={!hasSelectedItems || isGenerating}
             icon={isGenerating ? undefined : "chef-hat"}
-            style={styles.generateButton}
+            style={[
+              styles.generateButton,
+              !hasSelectedItems && styles.disabledButton
+            ]}
           >
             {isGenerating ? (
               <ThemedView style={styles.loadingContainer}>
@@ -97,6 +99,13 @@ export function MealPlanGenerator() {
               '選択した食材で献立を作成'
             )}
           </Button>
+
+          {/* 食材未選択時のヒントメッセージ */}
+          {!hasSelectedItems && (
+            <Text variant="bodySmall" style={styles.hintText}>
+              食材カテゴリから食材を選択してください
+            </Text>
+          )}
         </ThemedView>
 
         {/* エラー表示 */}
@@ -303,5 +312,15 @@ const styles = StyleSheet.create({
     color: '#555',
     marginBottom: 4,
     paddingLeft: 8,
+  },
+  disabledButton: {
+    backgroundColor: '#CCCCCC',
+    opacity: 0.6,
+  },
+  hintText: {
+    color: '#666',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
