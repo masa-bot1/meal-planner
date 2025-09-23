@@ -10,6 +10,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from '@/components/ThemedView';
 import MealPlannerHeaderImage from '@/components/MealPlannerHeaderImage';
 import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
+import { MealPlanGenerator } from '@/components/MealPlanGenerator';
 
 export default function HomeScreen() {
   return (
@@ -75,12 +76,8 @@ export default function HomeScreen() {
         </Card.Content>
       </Card>
 
-      {/* Buttons Example */}
-      <ThemedView style={styles.buttonContainer}>
-        <Button mode="contained" onPress={() => console.log('Contained button')}>
-          選択した食材で献立を作成
-        </Button>
-      </ThemedView>
+      {/* 献立作成機能 */}
+      <MealPlanGenerator />
     </ParallaxScrollView>
   );
 }
