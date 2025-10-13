@@ -1,9 +1,10 @@
 class MealPlanService
-  attr_reader :ingredients, :preferences
+  attr_reader :ingredients, :preferences, :servings
 
-  def initialize(ingredients:, preferences: {})
+  def initialize(ingredients:, preferences: {}, servings: 2)
     @ingredients = ingredients
     @preferences = preferences
+    @servings = servings
   end
 
   def generate
@@ -11,8 +12,14 @@ class MealPlanService
       # 入力データの検証
       return error_response('食材が指定されていません') if ingredients.blank?
 
-      # 献立生成ロジック（現在はモック、将来的にOpenAI API連携）
-      meal_suggestions = generate_meal_suggestions
+      # OpenAI API を使用した献立生成
+      if Rails.application.config.openai[:api_key].present?
+        meal_suggestions = generate_with_openai
+      else
+        # APIキーが未設定の場合はモック版を使用
+        Rails.logger.warn "OpenAI API key not configured, using mock generation"
+        meal_suggestions = generate_meal_suggestions
+      end
 
       {
         success: true,
@@ -27,6 +34,129 @@ class MealPlanService
   end
 
   private
+
+  def generate_with_openai
+    # OpenAIクライアントの初期化
+    client = OpenAI::Client.new(
+      api_key: Rails.application.config.openai[:api_key]
+    )
+
+    # システムプロンプトの設定
+    system_prompt = build_system_prompt
+    user_prompt = build_user_prompt
+
+    # OpenAI API呼び出し
+    response = client.chat.completions.create(
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: system_prompt },
+        { role: "user", content: user_prompt }
+      ],
+      max_tokens: 1000,
+      temperature: 0.7
+    )
+
+    # レスポンスの解析
+    parse_openai_response(response)
+  rescue OpenAI::Error => e
+    Rails.logger.error "OpenAI API error: #{e.message}"
+    # OpenAI APIエラーの場合はモック版にフォールバック
+    generate_meal_suggestions
+  end
+
+  def build_system_prompt
+    <<~PROMPT
+      あなたは日本の家庭料理に詳しい料理アシスタントです。
+      提供された食材を使って、栄養バランスの良い1日の献立（主菜、副菜、汁物）を提案してください。
+
+      以下の形式でJSONレスポンスを返してください：
+      {
+        "main_dish": {
+          "name": "料理名",
+          "ingredients": ["食材1", "食材2"],
+          "cooking_time": "調理時間（分）",
+          "calories": "カロリー（kcal）"
+        },
+        "side_dish": {
+          "name": "料理名",
+          "ingredients": ["食材1", "食材2"],
+          "cooking_time": "調理時間（分）",
+          "calories": "カロリー（kcal）"
+        },
+        "soup": {
+          "name": "料理名",
+          "ingredients": ["食材1", "食材2"],
+          "cooking_time": "調理時間（分）",
+          "calories": "カロリー（kcal）"
+        },
+        "total_calories": "合計カロリー（kcal）",
+        "cooking_tips": "調理のコツやポイント"
+      }
+
+      注意事項：
+      - 提供された食材を可能な限り使用してください
+      - 一般的な調味料（醤油、みそ、塩など）は含めなくても構いません
+      - 栄養バランスを考慮してください
+      - 調理時間は現実的な時間を設定してください
+    PROMPT
+  end
+
+  def build_user_prompt
+    ingredient_names = ingredients.map { |ing| ing.is_a?(Hash) ? ing[:name] || ing['name'] : ing.to_s }
+    ingredient_list = ingredient_names.join(', ')
+    serving_text = servings > 1 ? "#{servings}人分" : "1人分"
+
+    prompt = "以下の食材を使って#{serving_text}の献立を作成してください：\n#{ingredient_list}"
+
+    if preferences.present? && preferences.is_a?(Hash)
+      cuisine_type = preferences[:cuisine_type] || preferences['cuisine_type']
+      dietary_restrictions = preferences[:dietary_restrictions] || preferences['dietary_restrictions']
+
+      if cuisine_type.present?
+        prompt += "\n\n料理の種類: #{cuisine_type}"
+      end
+
+      if dietary_restrictions.present? && dietary_restrictions.any?
+        prompt += "\n\n食事制限: #{dietary_restrictions.join(', ')}"
+      end
+    end
+
+    prompt
+  end
+
+  def parse_openai_response(response)
+    content = response.dig("choices", 0, "message", "content")
+
+    # JSONの抽出（```json で囲まれている場合の処理）
+    json_match = content.match(/```json\n(.*?)\n```/m)
+    json_content = json_match ? json_match[1] : content
+
+    parsed_data = JSON.parse(json_content)
+
+    {
+      main_dish: format_dish(parsed_data["main_dish"]),
+      side_dish: format_dish(parsed_data["side_dish"]),
+      soup: format_dish(parsed_data["soup"]),
+      total_calories: parsed_data["total_calories"],
+      cooking_tips: parsed_data["cooking_tips"]
+    }
+  rescue JSON::ParserError => e
+    Rails.logger.error "Failed to parse OpenAI response: #{e.message}"
+    Rails.logger.error "Response content: #{content}"
+    # JSONパースエラーの場合はモック版にフォールバック
+    generate_meal_suggestions
+  end
+
+  def format_dish(dish_data)
+    return nil unless dish_data.is_a?(Hash)
+
+    {
+      name: dish_data["name"],
+      ingredients: dish_data["ingredients"] || [],
+      cooking_time: dish_data["cooking_time"],
+      calories: dish_data["calories"]
+    }
+  end
 
   def generate_meal_suggestions
     # 食材を分類
