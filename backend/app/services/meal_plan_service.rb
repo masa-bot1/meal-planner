@@ -52,7 +52,7 @@ class MealPlanService
         { role: "system", content: system_prompt },
         { role: "user", content: user_prompt }
       ],
-      max_tokens: 1000,
+      max_completion_tokens: 1000,
       temperature: 0.7
     )
 
