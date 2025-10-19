@@ -1,6 +1,6 @@
 class Api::V1::MealPlansController < ApplicationController
   # JSON形式でのレスポンスを前提
-  before_action :set_json_format  # 献立生成エンドポイント
+  before_action :set_json_format, only: [:generate]  # 献立生成エンドポイント
   # POST /api/v1/meal_plans/generate
   def generate
     begin
