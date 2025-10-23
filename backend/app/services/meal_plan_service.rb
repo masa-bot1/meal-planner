@@ -36,9 +36,12 @@ class MealPlanService
   private
 
   def generate_with_openai
-    # OpenAIクライアントの初期化
+    # OpenAIクライアントの初期化（本番環境以外でlog_errorsを有効化）
+    log_errors_enabled = true unless Rails.env.production?
+
     client = OpenAI::Client.new(
-      api_key: Rails.application.config.openai[:api_key]
+      access_token: Rails.application.config.openai[:api_key],
+      log_errors: log_errors_enabled
     )
 
     # システムプロンプトの設定
@@ -46,14 +49,15 @@ class MealPlanService
     user_prompt = build_user_prompt
 
     # OpenAI API呼び出し
-    response = client.chat.completions.create(
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: system_prompt },
-        { role: "user", content: user_prompt }
-      ],
-      max_completion_tokens: 1000,
-      temperature: 0.7
+    response = client.chat(
+      parameters: {
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: system_prompt },
+          { role: "user", content: user_prompt }
+        ],
+        temperature: 0.9
+      }
     )
 
     # レスポンスの解析
@@ -98,6 +102,8 @@ class MealPlanService
       - 一般的な調味料（醤油、みそ、塩など）は含めなくても構いません
       - 栄養バランスを考慮してください
       - 調理時間は現実的な時間を設定してください
+      - 毎回異なる料理を提案し、創造性を発揮してください
+      - 和食、洋食、中華など様々な料理ジャンルを考慮してください
     PROMPT
   end
 
