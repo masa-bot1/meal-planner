@@ -50,6 +50,14 @@ export function MealPlanGenerator() {
   // 食材が選択されているかどうかをチェック
   const hasSelectedItems = selectedItems.length > 0;
 
+  // 合計調理時間を計算する関数
+  const calculateTotalCookingTime = (suggestions: ApiMealSuggestions): number => {
+    const mainTime = parseInt(suggestions.main_dish.cooking_time) || 0;
+    const sideTime = parseInt(suggestions.side_dish.cooking_time) || 0;
+    const soupTime = parseInt(suggestions.soup.cooking_time) || 0;
+    return mainTime + sideTime + soupTime;
+  };
+
   return (
     <Card style={styles.card}>
       <Card.Title
@@ -277,7 +285,10 @@ export function MealPlanGenerator() {
                   📊 献立サマリー
                 </Text>
                 <Text variant="bodyLarge" style={styles.totalCalories}>
-                  合計カロリー: {mealSuggestions.total_calories}kcal
+                  🔥 合計カロリー: {mealSuggestions.total_calories}kcal
+                </Text>
+                <Text variant="bodyLarge" style={styles.totalTime}>
+                  ⏱️ 合計調理時間: {calculateTotalCookingTime(mealSuggestions)}分
                 </Text>
                 <Text variant="bodyMedium" style={styles.cookingTips}>
                   💡 料理のコツ: {mealSuggestions.cooking_tips}
@@ -442,6 +453,11 @@ const styles = StyleSheet.create({
   totalCalories: {
     fontWeight: 'bold',
     color: '#E65100',
+    marginBottom: 12,
+  },
+  totalTime: {
+    fontWeight: 'bold',
+    color: '#1976D2',
     marginBottom: 12,
   },
   cookingTips: {
