@@ -3,24 +3,15 @@ import { StyleSheet } from 'react-native';
 import { Button, Card, Text, Chip, ActivityIndicator } from 'react-native-paper';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
-import { MockMealPlanAPI } from '@/services/mockMealPlanAPI';
-
-interface MealSuggestion {
-  id: number;
-  name: string;
-  description: string;
-  ingredients: string[];
-  category: string;
-  cooking_time?: number;
-  difficulty?: string;
-  instructions?: string[];
-}
+import { MealPlanAPI, ApiMealSuggestions, ApiDishSuggestion } from '@/services/mealPlanAPI';
 
 export function MealPlanGenerator() {
   const { selectedItems } = useSelectedItems();
-  const [generatedMeals, setGeneratedMeals] = useState<MealSuggestion[]>([]);
+  const [mealSuggestions, setMealSuggestions] = useState<ApiMealSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
 
   // 献立作成ロジック（モックAPI呼び出し）
   const generateMealPlan = async () => {
@@ -33,8 +24,8 @@ export function MealPlanGenerator() {
     setError(null);
 
     try {
-      // モックAPIを呼び出し（将来的にRails + OpenAI APIに置き換え）
-      const response = await MockMealPlanAPI.generateMealPlan({
+      // Rails + OpenAI APIを呼び出し
+      const response = await MealPlanAPI.generateMealPlan({
         ingredients: selectedItems,
         preferences: {
           meal_type: '夕食', // デフォルト設定
@@ -44,27 +35,37 @@ export function MealPlanGenerator() {
 
       if (response.success) {
         // APIレスポンスから献立データを取得
-        const meals: MealSuggestion[] = response.data.meal_suggestions.map(meal => ({
-          id: meal.id,
-          name: meal.name,
-          description: meal.description,
-          category: meal.category,
-          ingredients: meal.ingredients,
-          cooking_time: meal.cooking_time,
-          difficulty: meal.difficulty,
-          instructions: meal.instructions
-        }));
-
-        setGeneratedMeals(meals);
+        const suggestions: ApiMealSuggestions = response.data.meal_suggestions;
+        setMealSuggestions(suggestions);
         console.log('献立生成成功:', response.data.total_suggestions, '件の献立を生成');
       } else {
         setError(response.message || '献立の生成に失敗しました');
       }
     } catch (err) {
-      console.error('API呼び出しエラー:', err);
-      setError('ネットワークエラーが発生しました');
+      console.error('Rails API呼び出しエラー:', err);
+      setError('Rails APIとの通信でエラーが発生しました');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  // Rails API接続テスト
+  const testApiConnection = async () => {
+    setIsTestingConnection(true);
+    setConnectionStatus(null);
+    setError(null);
+
+    try {
+      const result = await MealPlanAPI.testConnection();
+      setConnectionStatus(result.message);
+      if (!result.success) {
+        setError(result.message);
+      }
+    } catch (err) {
+      console.error('接続テストエラー:', err);
+      setError('接続テストでエラーが発生しました');
+    } finally {
+      setIsTestingConnection(false);
     }
   };
 
@@ -80,6 +81,31 @@ export function MealPlanGenerator() {
       />
       <Card.Content>
         <ThemedView style={styles.buttonContainer}>
+          {/* Rails API接続テストボタン */}
+          <Button
+            mode="outlined"
+            onPress={testApiConnection}
+            disabled={isTestingConnection || isGenerating}
+            icon={isTestingConnection ? undefined : "wifi"}
+            style={styles.testButton}
+          >
+            {isTestingConnection ? (
+              <ThemedView style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color="#6200ee" />
+                <Text style={styles.testLoadingText}>接続テスト中...</Text>
+              </ThemedView>
+            ) : (
+              'Rails API接続テスト'
+            )}
+          </Button>
+
+          {/* 接続状態表示 */}
+          {connectionStatus && (
+            <Text variant="bodySmall" style={styles.connectionStatus}>
+              🔗 {connectionStatus}
+            </Text>
+          )}
+
           <Button
             mode="contained"
             onPress={generateMealPlan}
@@ -117,79 +143,152 @@ export function MealPlanGenerator() {
           </Card>
         )}
 
-        {generatedMeals.length > 0 && (
+        {mealSuggestions && (
           <ThemedView style={styles.mealsContainer}>
             <Text variant="headlineSmall" style={styles.mealsTitle}>
               📋 提案された献立
             </Text>
             <Text variant="bodySmall" style={styles.mealsSubtitle}>
-              Rails + OpenAI APIから生成された献立（モック）
+              Rails + OpenAI APIから生成された献立
             </Text>
-            {generatedMeals.map((meal) => (
-              <Card key={meal.id} style={styles.mealCard}>
-                <Card.Content>
-                  <ThemedView style={styles.mealHeader}>
-                    <Text variant="titleMedium" style={styles.mealName}>
-                      {meal.name}
-                    </Text>
-                    <Chip mode="outlined" style={styles.categoryChip}>
-                      {meal.category}
-                    </Chip>
-                  </ThemedView>
-                  <Text variant="bodyMedium" style={styles.mealDescription}>
-                    {meal.description}
+
+            {/* 主菜 */}
+            <Card style={styles.mealCard}>
+              <Card.Content>
+                <ThemedView style={styles.mealHeader}>
+                  <Text variant="titleMedium" style={styles.mealName}>
+                    🍖 主菜: {mealSuggestions.main_dish.name}
                   </Text>
+                  <Chip mode="outlined" style={styles.categoryChip}>
+                    主菜
+                  </Chip>
+                </ThemedView>
 
-                  {/* 調理時間と難易度 */}
-                  {(meal.cooking_time || meal.difficulty) && (
-                    <ThemedView style={styles.mealInfoRow}>
-                      {meal.cooking_time && (
-                        <Chip mode="flat" style={styles.infoChip}>
-                          ⏱️ {meal.cooking_time}分
-                        </Chip>
-                      )}
-                      {meal.difficulty && (
-                        <Chip mode="flat" style={styles.infoChip}>
-                          📊 {meal.difficulty}
-                        </Chip>
-                      )}
-                    </ThemedView>
-                  )}
+                <ThemedView style={styles.mealInfoRow}>
+                  <Chip mode="flat" style={styles.infoChip}>
+                    ⏱️ {mealSuggestions.main_dish.cooking_time}分
+                  </Chip>
+                  <Chip mode="flat" style={styles.infoChip}>
+                    🔥 {mealSuggestions.main_dish.calories}kcal
+                  </Chip>
+                </ThemedView>
 
-                  <ThemedView style={styles.ingredientsContainer}>
-                    <Text variant="bodySmall" style={styles.ingredientsLabel}>
-                      使用食材:
-                    </Text>
-                    <ThemedView style={styles.ingredientChips}>
-                      {meal.ingredients.map((ingredient, idx) => (
-                        <Chip
-                          key={idx}
-                          mode="flat"
-                          style={styles.ingredientChip}
-                          textStyle={styles.ingredientChipText}
-                        >
-                          {ingredient}
-                        </Chip>
-                      ))}
-                    </ThemedView>
+                <ThemedView style={styles.ingredientsContainer}>
+                  <Text variant="bodySmall" style={styles.ingredientsLabel}>
+                    使用食材:
+                  </Text>
+                  <ThemedView style={styles.ingredientChips}>
+                    {mealSuggestions.main_dish.ingredients.map((ingredient, idx) => (
+                      <Chip
+                        key={idx}
+                        mode="flat"
+                        style={styles.ingredientChip}
+                        textStyle={styles.ingredientChipText}
+                      >
+                        {ingredient}
+                      </Chip>
+                    ))}
                   </ThemedView>
+                </ThemedView>
+              </Card.Content>
+            </Card>
 
-                  {/* 調理手順 */}
-                  {meal.instructions && meal.instructions.length > 0 && (
-                    <ThemedView style={styles.instructionsContainer}>
-                      <Text variant="bodySmall" style={styles.instructionsLabel}>
-                        📝 調理手順:
-                      </Text>
-                      {meal.instructions.map((instruction, idx) => (
-                        <Text key={idx} variant="bodySmall" style={styles.instructionText}>
-                          {idx + 1}. {instruction}
-                        </Text>
-                      ))}
-                    </ThemedView>
-                  )}
-                </Card.Content>
-              </Card>
-            ))}
+            {/* 副菜 */}
+            <Card style={styles.mealCard}>
+              <Card.Content>
+                <ThemedView style={styles.mealHeader}>
+                  <Text variant="titleMedium" style={styles.mealName}>
+                    🥗 副菜: {mealSuggestions.side_dish.name}
+                  </Text>
+                  <Chip mode="outlined" style={styles.categoryChip}>
+                    副菜
+                  </Chip>
+                </ThemedView>
+
+                <ThemedView style={styles.mealInfoRow}>
+                  <Chip mode="flat" style={styles.infoChip}>
+                    ⏱️ {mealSuggestions.side_dish.cooking_time}分
+                  </Chip>
+                  <Chip mode="flat" style={styles.infoChip}>
+                    🔥 {mealSuggestions.side_dish.calories}kcal
+                  </Chip>
+                </ThemedView>
+
+                <ThemedView style={styles.ingredientsContainer}>
+                  <Text variant="bodySmall" style={styles.ingredientsLabel}>
+                    使用食材:
+                  </Text>
+                  <ThemedView style={styles.ingredientChips}>
+                    {mealSuggestions.side_dish.ingredients.map((ingredient, idx) => (
+                      <Chip
+                        key={idx}
+                        mode="flat"
+                        style={styles.ingredientChip}
+                        textStyle={styles.ingredientChipText}
+                      >
+                        {ingredient}
+                      </Chip>
+                    ))}
+                  </ThemedView>
+                </ThemedView>
+              </Card.Content>
+            </Card>
+
+            {/* 汁物 */}
+            <Card style={styles.mealCard}>
+              <Card.Content>
+                <ThemedView style={styles.mealHeader}>
+                  <Text variant="titleMedium" style={styles.mealName}>
+                    🍲 汁物: {mealSuggestions.soup.name}
+                  </Text>
+                  <Chip mode="outlined" style={styles.categoryChip}>
+                    汁物
+                  </Chip>
+                </ThemedView>
+
+                <ThemedView style={styles.mealInfoRow}>
+                  <Chip mode="flat" style={styles.infoChip}>
+                    ⏱️ {mealSuggestions.soup.cooking_time}分
+                  </Chip>
+                  <Chip mode="flat" style={styles.infoChip}>
+                    🔥 {mealSuggestions.soup.calories}kcal
+                  </Chip>
+                </ThemedView>
+
+                <ThemedView style={styles.ingredientsContainer}>
+                  <Text variant="bodySmall" style={styles.ingredientsLabel}>
+                    使用食材:
+                  </Text>
+                  <ThemedView style={styles.ingredientChips}>
+                    {mealSuggestions.soup.ingredients.map((ingredient, idx) => (
+                      <Chip
+                        key={idx}
+                        mode="flat"
+                        style={styles.ingredientChip}
+                        textStyle={styles.ingredientChipText}
+                      >
+                        {ingredient}
+                      </Chip>
+                    ))}
+                  </ThemedView>
+                </ThemedView>
+              </Card.Content>
+            </Card>
+
+            {/* 合計カロリーと料理のコツ */}
+            <Card style={styles.summaryCard}>
+              <Card.Content>
+                <Text variant="titleMedium" style={styles.summaryTitle}>
+                  📊 献立サマリー
+                </Text>
+                <Text variant="bodyLarge" style={styles.totalCalories}>
+                  合計カロリー: {mealSuggestions.total_calories}kcal
+                </Text>
+                <Text variant="bodyMedium" style={styles.cookingTips}>
+                  💡 料理のコツ: {mealSuggestions.cooking_tips}
+                </Text>
+              </Card.Content>
+            </Card>
           </ThemedView>
         )}
       </Card.Content>
@@ -322,5 +421,38 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     marginTop: 8,
+  },
+  testButton: {
+    marginBottom: 12,
+    borderColor: '#6200ee',
+  },
+  testLoadingText: {
+    color: '#6200ee',
+    fontSize: 14,
+  },
+  connectionStatus: {
+    color: '#2E7D32',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  summaryCard: {
+    marginTop: 16,
+    backgroundColor: '#F3E5F5',
+    elevation: 3,
+  },
+  summaryTitle: {
+    fontWeight: 'bold',
+    color: '#7B1FA2',
+    marginBottom: 12,
+  },
+  totalCalories: {
+    fontWeight: 'bold',
+    color: '#E65100',
+    marginBottom: 12,
+  },
+  cookingTips: {
+    color: '#424242',
+    lineHeight: 20,
   },
 });
