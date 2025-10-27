@@ -1,3 +1,6 @@
+require 'cgi'
+require 'uri'
+
 class MealPlanService
   attr_reader :ingredients, :preferences, :servings
 
@@ -104,6 +107,7 @@ class MealPlanService
       - 調理時間は現実的な時間を設定してください
       - 毎回異なる料理を提案し、創造性を発揮してください
       - 和食、洋食、中華など様々な料理ジャンルを考慮してください
+      - 料理名は検索しやすい一般的な名称を使用してください
     PROMPT
   end
 
@@ -156,11 +160,36 @@ class MealPlanService
   def format_dish(dish_data)
     return nil unless dish_data.is_a?(Hash)
 
-    {
-      name: dish_data["name"],
+    dish_name = dish_data["name"]
+
+    formatted_dish = {
+      name: dish_name,
       ingredients: dish_data["ingredients"] || [],
       cooking_time: dish_data["cooking_time"],
       calories: dish_data["calories"]
+    }
+
+    # 料理名から検索ベースのレシピリンクを生成
+    if dish_name.present?
+      formatted_dish[:recipe_links] = generate_search_links(dish_name)
+    end
+
+    formatted_dish
+  end
+
+  # 料理名から検索ベースのリンクを生成
+  def generate_search_links(dish_name)
+    # 検索クエリを構築（スペース区切り）
+    youtube_query = "#{dish_name} レシピ"
+    google_query = "#{dish_name} レシピ クックパッド"
+
+    # URL用にエンコード（日本語対応）
+    encoded_youtube = URI.encode_www_form_component(youtube_query)
+    encoded_google = URI.encode_www_form_component(google_query)
+
+    {
+      youtube: "https://www.youtube.com/results?search_query=#{encoded_youtube}",
+      website: "https://www.google.com/search?q=#{encoded_google}"
     }
   end
 

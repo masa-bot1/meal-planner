@@ -4,6 +4,8 @@ import { Button, Card, Text, Chip, ActivityIndicator } from 'react-native-paper'
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
 import { MealPlanAPI, ApiMealSuggestions } from '@/services/mealPlanAPI';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 
 export function MealPlanGenerator() {
   const { selectedItems } = useSelectedItems();
@@ -56,6 +58,27 @@ export function MealPlanGenerator() {
     const sideTime = parseInt(suggestions.side_dish.cooking_time) || 0;
     const soupTime = parseInt(suggestions.soup.cooking_time) || 0;
     return mainTime + sideTime + soupTime;
+  };
+
+  // レシピリンクを開く関数
+  const openRecipeLink = async (url: string, type: 'youtube' | 'website') => {
+    try {
+      // YouTube リンクの場合は可能であればアプリで開く
+      if (type === 'youtube') {
+        await Linking.openURL(url);
+      } else {
+        // Web サイトの場合はインアプリブラウザで開く
+        await WebBrowser.openBrowserAsync(url);
+      }
+    } catch (error) {
+      console.error('リンクを開けませんでした:', error);
+      // フォールバック: デフォルトブラウザで開く
+      try {
+        await Linking.openURL(url);
+      } catch (fallbackError) {
+        console.error('フォールバック失敗:', fallbackError);
+      }
+    }
   };
 
   return (
@@ -145,6 +168,39 @@ export function MealPlanGenerator() {
                   </Chip>
                 </ThemedView>
 
+                {/* レシピリンクボタン */}
+                {mealSuggestions.main_dish.recipe_links && (
+                  <ThemedView style={styles.recipeLinksContainer}>
+                    <Text variant="bodySmall" style={styles.recipeLinksLabel}>
+                      📱 レシピ:
+                    </Text>
+                    <ThemedView style={styles.recipeLinksRow}>
+                      {mealSuggestions.main_dish.recipe_links.youtube && (
+                        <Button
+                          mode="contained"
+                          style={styles.youtubeButton}
+                          onPress={() => openRecipeLink(mealSuggestions.main_dish.recipe_links!.youtube!, 'youtube')}
+                          icon="play"
+                          compact
+                        >
+                          YouTube検索
+                        </Button>
+                      )}
+                      {mealSuggestions.main_dish.recipe_links.website && (
+                        <Button
+                          mode="contained"
+                          style={styles.websiteButton}
+                          onPress={() => openRecipeLink(mealSuggestions.main_dish.recipe_links!.website!, 'website')}
+                          icon="web"
+                          compact
+                        >
+                          Google検索
+                        </Button>
+                      )}
+                    </ThemedView>
+                  </ThemedView>
+                )}
+
                 <ThemedView style={styles.ingredientsContainer}>
                   <Text variant="bodySmall" style={styles.ingredientsLabel}>
                     使用食材:
@@ -201,6 +257,39 @@ export function MealPlanGenerator() {
                   </Chip>
                 </ThemedView>
 
+                {/* レシピリンクボタン */}
+                {mealSuggestions.side_dish.recipe_links && (
+                  <ThemedView style={styles.recipeLinksContainer}>
+                    <Text variant="bodySmall" style={styles.recipeLinksLabel}>
+                      📱 レシピ:
+                    </Text>
+                    <ThemedView style={styles.recipeLinksRow}>
+                      {mealSuggestions.side_dish.recipe_links.youtube && (
+                        <Button
+                          mode="contained"
+                          style={styles.youtubeButton}
+                          onPress={() => openRecipeLink(mealSuggestions.side_dish.recipe_links!.youtube!, 'youtube')}
+                          icon="play"
+                          compact
+                        >
+                          YouTube検索
+                        </Button>
+                      )}
+                      {mealSuggestions.side_dish.recipe_links.website && (
+                        <Button
+                          mode="contained"
+                          style={styles.websiteButton}
+                          onPress={() => openRecipeLink(mealSuggestions.side_dish.recipe_links!.website!, 'website')}
+                          icon="web"
+                          compact
+                        >
+                          Google検索
+                        </Button>
+                      )}
+                    </ThemedView>
+                  </ThemedView>
+                )}
+
                 <ThemedView style={styles.ingredientsContainer}>
                   <Text variant="bodySmall" style={styles.ingredientsLabel}>
                     使用食材:
@@ -256,6 +345,39 @@ export function MealPlanGenerator() {
                     🔥 {mealSuggestions.soup.calories}kcal
                   </Chip>
                 </ThemedView>
+
+                {/* レシピリンクボタン */}
+                {mealSuggestions.soup.recipe_links && (
+                  <ThemedView style={styles.recipeLinksContainer}>
+                    <Text variant="bodySmall" style={styles.recipeLinksLabel}>
+                      📱 レシピ:
+                    </Text>
+                    <ThemedView style={styles.recipeLinksRow}>
+                      {mealSuggestions.soup.recipe_links.youtube && (
+                        <Button
+                          mode="contained"
+                          style={styles.youtubeButton}
+                          onPress={() => openRecipeLink(mealSuggestions.soup.recipe_links!.youtube!, 'youtube')}
+                          icon="play"
+                          compact
+                        >
+                          YouTube検索
+                        </Button>
+                      )}
+                      {mealSuggestions.soup.recipe_links.website && (
+                        <Button
+                          mode="contained"
+                          style={styles.websiteButton}
+                          onPress={() => openRecipeLink(mealSuggestions.soup.recipe_links!.website!, 'website')}
+                          icon="web"
+                          compact
+                        >
+                          Google検索
+                        </Button>
+                      )}
+                    </ThemedView>
+                  </ThemedView>
+                )}
 
                 <ThemedView style={styles.ingredientsContainer}>
                   <Text variant="bodySmall" style={styles.ingredientsLabel}>
@@ -463,5 +585,28 @@ const styles = StyleSheet.create({
   cookingTips: {
     color: '#424242',
     lineHeight: 20,
+  },
+  recipeLinksContainer: {
+    marginTop: 10,
+    marginBottom: 8,
+  },
+  recipeLinksLabel: {
+    fontWeight: 'bold',
+    marginBottom: 6,
+    color: '#424242',
+  },
+  recipeLinksRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  youtubeButton: {
+    backgroundColor: '#FF0000',
+    borderRadius: 8,
+    flex: 1,
+  },
+  websiteButton: {
+    backgroundColor: '#4CAF50',
+    borderRadius: 8,
+    flex: 1,
   },
 });

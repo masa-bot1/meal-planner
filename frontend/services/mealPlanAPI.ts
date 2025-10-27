@@ -17,12 +17,19 @@ interface MealPlanRequest {
   };
 }
 
+// レシピリンクの型定義
+export interface RecipeLinks {
+  youtube?: string;    // YouTube動画URL
+  website?: string;    // 料理サイトURL (クックパッド等)
+}
+
 // Rails APIから返される個別の料理データの型定義
 export interface ApiDishSuggestion {
   name: string;
   ingredients: string[];
   cooking_time: string;
   calories: string;
+  recipe_links?: RecipeLinks;  // レシピリンク（オプショナル）
 }
 
 // Rails APIから返される献立データの型定義
