@@ -3,15 +3,13 @@ import { StyleSheet } from 'react-native';
 import { Button, Card, Text, Chip, ActivityIndicator } from 'react-native-paper';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
-import { MealPlanAPI, ApiMealSuggestions, ApiDishSuggestion } from '@/services/mealPlanAPI';
+import { MealPlanAPI, ApiMealSuggestions } from '@/services/mealPlanAPI';
 
 export function MealPlanGenerator() {
   const { selectedItems } = useSelectedItems();
   const [mealSuggestions, setMealSuggestions] = useState<ApiMealSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<string | null>(null);
 
   // 献立作成ロジック（モックAPI呼び出し）
   const generateMealPlan = async () => {
@@ -49,26 +47,6 @@ export function MealPlanGenerator() {
     }
   };
 
-  // Rails API接続テスト
-  const testApiConnection = async () => {
-    setIsTestingConnection(true);
-    setConnectionStatus(null);
-    setError(null);
-
-    try {
-      const result = await MealPlanAPI.testConnection();
-      setConnectionStatus(result.message);
-      if (!result.success) {
-        setError(result.message);
-      }
-    } catch (err) {
-      console.error('接続テストエラー:', err);
-      setError('接続テストでエラーが発生しました');
-    } finally {
-      setIsTestingConnection(false);
-    }
-  };
-
   // 食材が選択されているかどうかをチェック
   const hasSelectedItems = selectedItems.length > 0;
 
@@ -81,31 +59,6 @@ export function MealPlanGenerator() {
       />
       <Card.Content>
         <ThemedView style={styles.buttonContainer}>
-          {/* Rails API接続テストボタン */}
-          <Button
-            mode="outlined"
-            onPress={testApiConnection}
-            disabled={isTestingConnection || isGenerating}
-            icon={isTestingConnection ? undefined : "wifi"}
-            style={styles.testButton}
-          >
-            {isTestingConnection ? (
-              <ThemedView style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color="#6200ee" />
-                <Text style={styles.testLoadingText}>接続テスト中...</Text>
-              </ThemedView>
-            ) : (
-              'Rails API接続テスト'
-            )}
-          </Button>
-
-          {/* 接続状態表示 */}
-          {connectionStatus && (
-            <Text variant="bodySmall" style={styles.connectionStatus}>
-              🔗 {connectionStatus}
-            </Text>
-          )}
-
           <Button
             mode="contained"
             onPress={generateMealPlan}
@@ -148,9 +101,6 @@ export function MealPlanGenerator() {
             <Text variant="headlineSmall" style={styles.mealsTitle}>
               📋 提案された献立
             </Text>
-            <Text variant="bodySmall" style={styles.mealsSubtitle}>
-              Rails + OpenAI APIから生成された献立
-            </Text>
 
             {/* 主菜 */}
             <Card style={styles.mealCard}>
@@ -159,16 +109,30 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🍖 主菜: {mealSuggestions.main_dish.name}
                   </Text>
-                  <Chip mode="outlined" style={styles.categoryChip}>
+                  <Chip 
+                    mode="outlined" 
+                    style={styles.categoryChip}
+                    compact={false}
+                  >
                     主菜
                   </Chip>
                 </ThemedView>
 
                 <ThemedView style={styles.mealInfoRow}>
-                  <Chip mode="flat" style={styles.infoChip}>
+                  <Chip 
+                    mode="flat" 
+                    style={styles.infoChip}
+                    textStyle={styles.infoChipText}
+                    compact={false}
+                  >
                     ⏱️ {mealSuggestions.main_dish.cooking_time}分
                   </Chip>
-                  <Chip mode="flat" style={styles.infoChip}>
+                  <Chip 
+                    mode="flat" 
+                    style={styles.infoChip}
+                    textStyle={styles.infoChipText}
+                    compact={false}
+                  >
                     🔥 {mealSuggestions.main_dish.calories}kcal
                   </Chip>
                 </ThemedView>
@@ -184,6 +148,7 @@ export function MealPlanGenerator() {
                         mode="flat"
                         style={styles.ingredientChip}
                         textStyle={styles.ingredientChipText}
+                        compact={false}
                       >
                         {ingredient}
                       </Chip>
@@ -200,16 +165,30 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🥗 副菜: {mealSuggestions.side_dish.name}
                   </Text>
-                  <Chip mode="outlined" style={styles.categoryChip}>
+                  <Chip 
+                    mode="outlined" 
+                    style={styles.categoryChip}
+                    compact={false}
+                  >
                     副菜
                   </Chip>
                 </ThemedView>
 
                 <ThemedView style={styles.mealInfoRow}>
-                  <Chip mode="flat" style={styles.infoChip}>
+                  <Chip 
+                    mode="flat" 
+                    style={styles.infoChip}
+                    textStyle={styles.infoChipText}
+                    compact={false}
+                  >
                     ⏱️ {mealSuggestions.side_dish.cooking_time}分
                   </Chip>
-                  <Chip mode="flat" style={styles.infoChip}>
+                  <Chip 
+                    mode="flat" 
+                    style={styles.infoChip}
+                    textStyle={styles.infoChipText}
+                    compact={false}
+                  >
                     🔥 {mealSuggestions.side_dish.calories}kcal
                   </Chip>
                 </ThemedView>
@@ -225,6 +204,7 @@ export function MealPlanGenerator() {
                         mode="flat"
                         style={styles.ingredientChip}
                         textStyle={styles.ingredientChipText}
+                        compact={false}
                       >
                         {ingredient}
                       </Chip>
@@ -241,16 +221,30 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🍲 汁物: {mealSuggestions.soup.name}
                   </Text>
-                  <Chip mode="outlined" style={styles.categoryChip}>
+                  <Chip 
+                    mode="outlined" 
+                    style={styles.categoryChip}
+                    compact={false}
+                  >
                     汁物
                   </Chip>
                 </ThemedView>
 
                 <ThemedView style={styles.mealInfoRow}>
-                  <Chip mode="flat" style={styles.infoChip}>
+                  <Chip 
+                    mode="flat" 
+                    style={styles.infoChip}
+                    textStyle={styles.infoChipText}
+                    compact={false}
+                  >
                     ⏱️ {mealSuggestions.soup.cooking_time}分
                   </Chip>
-                  <Chip mode="flat" style={styles.infoChip}>
+                  <Chip 
+                    mode="flat" 
+                    style={styles.infoChip}
+                    textStyle={styles.infoChipText}
+                    compact={false}
+                  >
                     🔥 {mealSuggestions.soup.calories}kcal
                   </Chip>
                 </ThemedView>
@@ -266,6 +260,7 @@ export function MealPlanGenerator() {
                         mode="flat"
                         style={styles.ingredientChip}
                         textStyle={styles.ingredientChipText}
+                        compact={false}
                       >
                         {ingredient}
                       </Chip>
@@ -362,6 +357,8 @@ const styles = StyleSheet.create({
   },
   categoryChip: {
     backgroundColor: '#E8F5E8',
+    minHeight: 32,
+    paddingVertical: 4,
   },
   mealDescription: {
     color: '#666',
@@ -371,10 +368,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginBottom: 12,
+    alignItems: 'center',
   },
   infoChip: {
     backgroundColor: '#E3F2FD',
-    height: 28,
+    minHeight: 36,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+  },
+  infoChipText: {
+    fontSize: 14,
+    lineHeight: 20,
+    paddingVertical: 2,
   },
   ingredientsContainer: {
     marginTop: 8,
@@ -391,10 +396,12 @@ const styles = StyleSheet.create({
   },
   ingredientChip: {
     backgroundColor: '#F3E5F5',
-    height: 28,
+    minHeight: 32,
+    paddingVertical: 4,
   },
   ingredientChipText: {
     fontSize: 12,
+    lineHeight: 16,
   },
   instructionsContainer: {
     marginTop: 12,
@@ -421,20 +428,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     marginTop: 8,
-  },
-  testButton: {
-    marginBottom: 12,
-    borderColor: '#6200ee',
-  },
-  testLoadingText: {
-    color: '#6200ee',
-    fontSize: 14,
-  },
-  connectionStatus: {
-    color: '#2E7D32',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginBottom: 8,
   },
   summaryCard: {
     marginTop: 16,
