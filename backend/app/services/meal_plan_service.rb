@@ -66,8 +66,29 @@ class MealPlanService
     # レスポンスの解析
     parse_openai_response(response)
   rescue OpenAI::Error => e
-    Rails.logger.error "OpenAI API error: #{e.message}"
+    Rails.logger.error "OpenAI API error: #{e.class.name} - #{e.message}"
+    Rails.logger.error e.backtrace.first(5).join("\n")
+
+    # エラーの種類に応じた処理
+    error_message = case e
+    when OpenAI::RateLimitError
+      'APIの利用制限に達しました。しばらく待ってから再度お試しください。'
+    when OpenAI::InvalidRequestError
+      'リクエストに問題がありました。入力内容を確認してください。'
+    when OpenAI::AuthenticationError
+      'API認証エラーが発生しました。'
+    when OpenAI::TimeoutError
+      'API接続がタイムアウトしました。もう一度お試しください。'
+    else
+      'AI献立生成でエラーが発生しました。'
+    end
+
+    Rails.logger.warn "Falling back to mock generation due to: #{error_message}"
     # OpenAI APIエラーの場合はモック版にフォールバック
+    generate_meal_suggestions
+  rescue StandardError => e
+    Rails.logger.error "Unexpected error in generate_with_openai: #{e.message}"
+    Rails.logger.error e.backtrace.first(5).join("\n")
     generate_meal_suggestions
   end
 

@@ -122,7 +122,17 @@ export function MealPlanGenerator() {
         {error && (
           <Card style={styles.errorCard}>
             <Card.Content>
-              <Text style={styles.errorText}>⚠️ {error}</Text>
+              <ThemedView style={styles.errorContent}>
+                <Text style={styles.errorText}>⚠️ {error}</Text>
+                <Button
+                  mode="contained"
+                  onPress={generateMealPlan}
+                  style={styles.retryButton}
+                  disabled={isGenerating || selectedItems.length === 0}
+                >
+                  もう一度試す
+                </Button>
+              </ThemedView>
             </Card.Content>
           </Card>
         )}
@@ -140,8 +150,8 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🍖 主菜: {mealSuggestions.main_dish.name}
                   </Text>
-                  <Chip 
-                    mode="outlined" 
+                  <Chip
+                    mode="outlined"
                     style={styles.categoryChip}
                     compact={false}
                   >
@@ -150,16 +160,16 @@ export function MealPlanGenerator() {
                 </ThemedView>
 
                 <ThemedView style={styles.mealInfoRow}>
-                  <Chip 
-                    mode="flat" 
+                  <Chip
+                    mode="flat"
                     style={styles.infoChip}
                     textStyle={styles.infoChipText}
                     compact={false}
                   >
                     ⏱️ {mealSuggestions.main_dish.cooking_time}分
                   </Chip>
-                  <Chip 
-                    mode="flat" 
+                  <Chip
+                    mode="flat"
                     style={styles.infoChip}
                     textStyle={styles.infoChipText}
                     compact={false}
@@ -229,8 +239,8 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🥗 副菜: {mealSuggestions.side_dish.name}
                   </Text>
-                  <Chip 
-                    mode="outlined" 
+                  <Chip
+                    mode="outlined"
                     style={styles.categoryChip}
                     compact={false}
                   >
@@ -239,16 +249,16 @@ export function MealPlanGenerator() {
                 </ThemedView>
 
                 <ThemedView style={styles.mealInfoRow}>
-                  <Chip 
-                    mode="flat" 
+                  <Chip
+                    mode="flat"
                     style={styles.infoChip}
                     textStyle={styles.infoChipText}
                     compact={false}
                   >
                     ⏱️ {mealSuggestions.side_dish.cooking_time}分
                   </Chip>
-                  <Chip 
-                    mode="flat" 
+                  <Chip
+                    mode="flat"
                     style={styles.infoChip}
                     textStyle={styles.infoChipText}
                     compact={false}
@@ -318,8 +328,8 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🍲 汁物: {mealSuggestions.soup.name}
                   </Text>
-                  <Chip 
-                    mode="outlined" 
+                  <Chip
+                    mode="outlined"
                     style={styles.categoryChip}
                     compact={false}
                   >
@@ -328,16 +338,16 @@ export function MealPlanGenerator() {
                 </ThemedView>
 
                 <ThemedView style={styles.mealInfoRow}>
-                  <Chip 
-                    mode="flat" 
+                  <Chip
+                    mode="flat"
                     style={styles.infoChip}
                     textStyle={styles.infoChipText}
                     compact={false}
                   >
                     ⏱️ {mealSuggestions.soup.cooking_time}分
                   </Chip>
-                  <Chip 
-                    mode="flat" 
+                  <Chip
+                    mode="flat"
                     style={styles.infoChip}
                     textStyle={styles.infoChipText}
                     compact={false}
@@ -455,9 +465,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     elevation: 2,
   },
+  errorContent: {
+    gap: 12,
+  },
   errorText: {
     color: '#D32F2F',
     fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  retryButton: {
+    backgroundColor: '#F57C00',
+    marginTop: 8,
   },
   mealsContainer: {
     marginTop: 16,
