@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { StyleSheet } from 'react-native';
-import { Button, Card, Text, Chip, ActivityIndicator } from 'react-native-paper';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, Animated } from 'react-native';
+import { Button, Card, Text, Chip, ActivityIndicator, ProgressBar } from 'react-native-paper';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
 import { MealPlanAPI, ApiMealSuggestions } from '@/services/mealPlanAPI';
@@ -12,6 +12,69 @@ export function MealPlanGenerator() {
   const [mealSuggestions, setMealSuggestions] = useState<ApiMealSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // ローディングアニメーション開始
+  useEffect(() => {
+    if (isGenerating) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fadeAnim, {
+            toValue: 0.3,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      fadeAnim.setValue(0);
+    }
+  }, [isGenerating, fadeAnim]);
+
+  // 進捗メッセージの更新
+  useEffect(() => {
+    if (!isGenerating) return;
+
+    const messages = [
+      '食材を分析しています...',
+      'AIが献立を考えています...',
+      'レシピを検索しています...',
+      '栄養バランスを確認しています...',
+      '最終調整をしています...',
+    ];
+
+    let currentIndex = 0;
+    setLoadingMessage(messages[0]);
+    setLoadingProgress(0.2);
+
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % messages.length;
+      setLoadingMessage(messages[currentIndex]);
+      setLoadingProgress(Math.min(0.9, 0.2 + (currentIndex * 0.15)));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isGenerating]);
+
+  // 献立生成をキャンセル
+  const cancelGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsGenerating(false);
+    setLoadingProgress(0);
+    setLoadingMessage('');
+    setError('献立の生成がキャンセルされました');
+  };
 
   // 献立作成ロジック（モックAPI呼び出し）
   const generateMealPlan = async () => {
@@ -22,6 +85,11 @@ export function MealPlanGenerator() {
 
     setIsGenerating(true);
     setError(null);
+    setLoadingProgress(0.1);
+    setLoadingMessage('準備中...');
+
+    // AbortControllerを作成
+    abortControllerRef.current = new AbortController();
 
     try {
       // Rails + OpenAI APIを呼び出し
@@ -37,15 +105,26 @@ export function MealPlanGenerator() {
         // APIレスポンスから献立データを取得
         const suggestions: ApiMealSuggestions = response.data.meal_suggestions;
         setMealSuggestions(suggestions);
+        setLoadingProgress(1);
+        setLoadingMessage('完了しました！');
         console.log('献立生成成功:', response.data.total_suggestions, '件の献立を生成');
       } else {
         setError(response.message || '献立の生成に失敗しました');
       }
     } catch (err) {
       console.error('Rails API呼び出しエラー:', err);
-      setError('Rails APIとの通信でエラーが発生しました');
+      if (abortControllerRef.current?.signal.aborted) {
+        // キャンセルされた場合は何もしない（既にエラー設定済み）
+      } else {
+        setError('Rails APIとの通信でエラーが発生しました');
+      }
     } finally {
       setIsGenerating(false);
+      abortControllerRef.current = null;
+      setTimeout(() => {
+        setLoadingProgress(0);
+        setLoadingMessage('');
+      }, 1000);
     }
   };
 
@@ -109,6 +188,35 @@ export function MealPlanGenerator() {
               '選択した食材で献立を作成'
             )}
           </Button>
+
+          {/* ローディング中の詳細表示 */}
+          {isGenerating && (
+            <Animated.View style={[styles.loadingDetailsCard, { opacity: fadeAnim }]}>
+              <Card style={styles.progressCard}>
+                <Card.Content>
+                  <ThemedView style={styles.progressContent}>
+                    <ActivityIndicator size="large" color="#4CAF50" />
+                    <Text variant="titleMedium" style={styles.progressTitle}>
+                      {loadingMessage}
+                    </Text>
+                    <ProgressBar
+                      progress={loadingProgress}
+                      color="#4CAF50"
+                      style={styles.progressBar}
+                    />
+                    <Button
+                      mode="outlined"
+                      onPress={cancelGeneration}
+                      style={styles.cancelButton}
+                      textColor="#FF5252"
+                    >
+                      キャンセル
+                    </Button>
+                  </ThemedView>
+                </Card.Content>
+              </Card>
+            </Animated.View>
+          )}
 
           {/* 食材未選択時のヒントメッセージ */}
           {!hasSelectedItems && (
@@ -626,5 +734,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#4CAF50',
     borderRadius: 8,
     flex: 1,
+  },
+  loadingDetailsCard: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  progressCard: {
+    backgroundColor: '#F5F5F5',
+    elevation: 3,
+  },
+  progressContent: {
+    alignItems: 'center',
+    gap: 16,
+    paddingVertical: 8,
+  },
+  progressTitle: {
+    fontWeight: 'bold',
+    color: '#4CAF50',
+    textAlign: 'center',
+  },
+  progressBar: {
+    width: '100%',
+    height: 8,
+    borderRadius: 4,
+  },
+  cancelButton: {
+    borderColor: '#FF5252',
+    borderWidth: 1,
+    marginTop: 8,
   },
 });
