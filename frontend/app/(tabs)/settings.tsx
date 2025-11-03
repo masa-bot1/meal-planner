@@ -117,7 +117,7 @@ export default function SettingsScreen() {
 
         {/* フッター */}
         <View style={styles.footer}>
-          <ThemedText style={styles.footerText}>© 2025 献立プランナー</ThemedText>
+          <ThemedText style={styles.footerText}>© 2025 献立くん</ThemedText>
           <ThemedText style={styles.footerText}>Version 1.0.0</ThemedText>
         </View>
       </ScrollView>
@@ -132,7 +132,7 @@ export default function SettingsScreen() {
           <Card>
             <Card.Content>
               <ThemedText type="subtitle" style={styles.modalTitle}>
-                献立プランナーについて
+                献立くんについて
               </ThemedText>
               <ThemedText style={styles.modalText}>
                 バージョン: 1.0.0
@@ -142,7 +142,7 @@ export default function SettingsScreen() {
               </ThemedText>
               <ThemedText style={styles.modalText}>
                 {'\n'}
-                このアプリは、選択した食材から最適な献立を提案するAI搭載の献立プランナーです。
+                このアプリは、選択した食材から最適な献立を提案するAI搭載の献立アプリです。
               </ThemedText>
               <ThemedText style={styles.modalText}>
                 {'\n'}
