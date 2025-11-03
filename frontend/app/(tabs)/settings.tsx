@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, ScrollView, View, Platform, Linking } from 'react-native';
-import { Card, List, Divider, Switch, Portal, Modal, Button } from 'react-native-paper';
+import { Card, List, Divider, Portal, Modal, Button } from 'react-native-paper';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import * as WebBrowser from 'expo-web-browser';
 
 export default function SettingsScreen() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
 
   // ドキュメントのベースURL
@@ -72,44 +70,6 @@ export default function SettingsScreen() {
           <ThemedText type="title" style={styles.headerTitle}>設定</ThemedText>
           <ThemedText style={styles.headerSubtitle}>アプリの設定と情報</ThemedText>
         </ThemedView>
-
-        {/* 通知設定 */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>通知設定</ThemedText>
-            <List.Item
-              title="プッシュ通知"
-              description="献立のリマインダーを受け取る"
-              left={(props) => <List.Icon {...props} icon="bell" />}
-              right={() => (
-                <Switch
-                  value={notificationsEnabled}
-                  onValueChange={setNotificationsEnabled}
-                  color="#FF9800"
-                />
-              )}
-            />
-          </Card.Content>
-        </Card>
-
-        {/* 表示設定 */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <ThemedText type="subtitle" style={styles.sectionTitle}>表示設定</ThemedText>
-            <List.Item
-              title="ダークモード"
-              description="ダークテーマを使用する"
-              left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
-              right={() => (
-                <Switch
-                  value={darkModeEnabled}
-                  onValueChange={setDarkModeEnabled}
-                  color="#FF9800"
-                />
-              )}
-            />
-          </Card.Content>
-        </Card>
 
         {/* 法的情報 */}
         <Card style={styles.card}>
