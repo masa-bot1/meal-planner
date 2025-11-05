@@ -50,10 +50,10 @@ export default function SettingsScreen() {
     }
   };
 
-  // お問い合わせメールを開く
+  // ご意見・ご要望メールを開く
   const openContactEmail = async () => {
     const email = 'support@your-domain.com'; // 実際のメールアドレスに置き換える
-    const subject = '【献立アプリ】お問い合わせ';
+    const subject = '【献立くん】ご意見・ご要望';
     const url = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
 
     try {
@@ -98,8 +98,8 @@ export default function SettingsScreen() {
           <Card.Content>
             <ThemedText type="subtitle" style={styles.sectionTitle}>サポート</ThemedText>
             <List.Item
-              title="お問い合わせ"
-              description="質問や不具合の報告"
+              title="ご意見・ご要望"
+              description="アプリに関するご意見やご要望"
               left={(props) => <List.Icon {...props} icon="email" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
               onPress={openContactEmail}
