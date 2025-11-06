@@ -8,19 +8,12 @@ import * as WebBrowser from 'expo-web-browser';
 export default function SettingsScreen() {
   const [showAboutModal, setShowAboutModal] = useState(false);
 
-  // ドキュメントのベースURL
-  const getDocumentBaseUrl = () => {
-    // 本番環境では実際のURLに置き換える
-    // 開発環境ではローカルサーバーまたは外部ホスティングを使用
-    return __DEV__
-      ? 'https://raw.githubusercontent.com/your-repo/main/frontend/public'  // GitHubでホストする場合
-      : 'https://your-domain.com';  // 本番環境のドメイン
-  };
+  // GitHub PagesのドキュメントベースURL
+  const DOCS_BASE_URL = 'https://masa-bot1.github.io/meal-planner';
 
   // 利用規約を開く
   const openTermsOfService = async () => {
-    // 開発中は簡易版のアラートまたは外部ホスティングのURLを使用
-    const url = `${getDocumentBaseUrl()}/terms.html`;
+    const url = `${DOCS_BASE_URL}/terms.html`;
     try {
       await WebBrowser.openBrowserAsync(url);
     } catch (error) {
@@ -36,7 +29,7 @@ export default function SettingsScreen() {
 
   // プライバシーポリシーを開く
   const openPrivacyPolicy = async () => {
-    const url = `${getDocumentBaseUrl()}/privacy.html`;
+    const url = `${DOCS_BASE_URL}/privacy.html`;
     try {
       await WebBrowser.openBrowserAsync(url);
     } catch (error) {
