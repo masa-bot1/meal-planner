@@ -11,8 +11,8 @@ export default function SettingsScreen() {
   // GitHub PagesのドキュメントベースURL
   const DOCS_BASE_URL = 'https://masa-bot1.github.io/meal-planner';
 
-  // Google FormsのURL（作成後に実際のURLに置き換える）
-  const FEEDBACK_FORM_URL = 'https://forms.gle/xxxxx';
+  // Google FormsのURL
+  const FEEDBACK_FORM_URL = 'https://forms.gle/zYsTqBhAHVsFKx9o9';
 
   // 利用規約を開く
   const openTermsOfService = async () => {
