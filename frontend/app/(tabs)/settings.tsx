@@ -11,6 +11,9 @@ export default function SettingsScreen() {
   // GitHub PagesのドキュメントベースURL
   const DOCS_BASE_URL = 'https://masa-bot1.github.io/meal-planner';
 
+  // Google FormsのURL（作成後に実際のURLに置き換える）
+  const FEEDBACK_FORM_URL = 'https://forms.gle/xxxxx';
+
   // 利用規約を開く
   const openTermsOfService = async () => {
     const url = `${DOCS_BASE_URL}/terms.html`;
@@ -43,16 +46,18 @@ export default function SettingsScreen() {
     }
   };
 
-  // ご意見・ご要望メールを開く
-  const openContactEmail = async () => {
-    const email = 'support@your-domain.com'; // 実際のメールアドレスに置き換える
-    const subject = '【献立くん】ご意見・ご要望';
-    const url = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
-
+  // ご意見・ご要望フォームを開く
+  const openFeedbackForm = async () => {
     try {
-      await Linking.openURL(url);
+      await WebBrowser.openBrowserAsync(FEEDBACK_FORM_URL);
     } catch (error) {
-      console.error('メールアプリを開けませんでした:', error);
+      console.error('フォームを開けませんでした:', error);
+      // フォールバック
+      try {
+        await Linking.openURL(FEEDBACK_FORM_URL);
+      } catch (fallbackError) {
+        console.error('フォールバックも失敗:', fallbackError);
+      }
     }
   };
 
@@ -93,9 +98,9 @@ export default function SettingsScreen() {
             <List.Item
               title="ご意見・ご要望"
               description="アプリに関するご意見やご要望"
-              left={(props) => <List.Icon {...props} icon="email" />}
+              left={(props) => <List.Icon {...props} icon="message-text" />}
               right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              onPress={openContactEmail}
+              onPress={openFeedbackForm}
             />
             <Divider />
             <List.Item
