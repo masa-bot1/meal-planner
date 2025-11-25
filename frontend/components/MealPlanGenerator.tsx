@@ -4,6 +4,7 @@ import { Button, Card, Text, Chip, ActivityIndicator, ProgressBar } from 'react-
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
 import { MealPlanAPI, ApiMealSuggestions } from '@/services/mealPlanAPI';
+import { saveMealPlan, loadMealPlan } from '@/services/storageService';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -14,8 +15,28 @@ export function MealPlanGenerator() {
   const [error, setError] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [isLoadingFromStorage, setIsLoadingFromStorage] = useState(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  // アプリ起動時に保存された献立を読み込む
+  useEffect(() => {
+    const loadSavedMealPlan = async () => {
+      try {
+        const savedData = await loadMealPlan();
+        if (savedData) {
+          setMealSuggestions(savedData.mealPlan);
+          console.log('保存された献立を読み込みました:', savedData.createdAt);
+        }
+      } catch (error) {
+        console.error('献立の読み込みエラー:', error);
+      } finally {
+        setIsLoadingFromStorage(false);
+      }
+    };
+
+    loadSavedMealPlan();
+  }, []);
 
   // ローディングアニメーション開始
   useEffect(() => {
@@ -108,6 +129,16 @@ export function MealPlanGenerator() {
         setLoadingProgress(1);
         setLoadingMessage('完了しました！');
         console.log('献立生成成功:', response.data.total_suggestions, '件の献立を生成');
+        
+        // 生成した献立を自動保存
+        try {
+          const ingredientNames = selectedItems.map(item => item.name);
+          await saveMealPlan(ingredientNames, suggestions);
+          console.log('献立を自動保存しました');
+        } catch (saveError) {
+          console.error('献立の保存に失敗:', saveError);
+          // 保存失敗してもエラー表示はしない（献立は表示されている）
+        }
       } else {
         setError(response.message || '献立の生成に失敗しました');
       }
@@ -159,6 +190,18 @@ export function MealPlanGenerator() {
       }
     }
   };
+
+  // 初回読み込み中の表示
+  if (isLoadingFromStorage) {
+    return (
+      <Card style={styles.card}>
+        <Card.Content style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FF9800" />
+          <Text style={styles.loadingText}>読み込み中...</Text>
+        </Card.Content>
+      </Card>
+    );
+  }
 
   return (
     <Card style={styles.card}>
