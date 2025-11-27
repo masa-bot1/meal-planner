@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Animated } from 'react-native';
-import { Button, Card, Text, Chip, ActivityIndicator, ProgressBar } from 'react-native-paper';
+import { StyleSheet, Animated, Alert } from 'react-native';
+import { Button, Card, Text, Chip, ActivityIndicator, ProgressBar, IconButton } from 'react-native-paper';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
 import { MealPlanAPI, ApiMealSuggestions } from '@/services/mealPlanAPI';
-import { saveMealPlan, loadMealPlan } from '@/services/storageService';
+import { saveMealPlan, loadMealPlan, clearMealPlan } from '@/services/storageService';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -129,7 +129,7 @@ export function MealPlanGenerator() {
         setLoadingProgress(1);
         setLoadingMessage('完了しました！');
         console.log('献立生成成功:', response.data.total_suggestions, '件の献立を生成');
-        
+
         // 生成した献立を自動保存
         try {
           const ingredientNames = selectedItems.map(item => item.name);
@@ -189,6 +189,34 @@ export function MealPlanGenerator() {
         console.error('フォールバック失敗:', fallbackError);
       }
     }
+  };
+
+  // 献立を削除する関数
+  const handleClearMealPlan = () => {
+    Alert.alert(
+      '献立を削除',
+      '保存された献立を削除しますか？',
+      [
+        {
+          text: 'キャンセル',
+          style: 'cancel'
+        },
+        {
+          text: '削除',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await clearMealPlan();
+              setMealSuggestions(null);
+              console.log('献立を削除しました');
+            } catch (error) {
+              console.error('献立の削除に失敗:', error);
+              setError('献立の削除に失敗しました');
+            }
+          }
+        }
+      ]
+    );
   };
 
   // 初回読み込み中の表示
@@ -288,11 +316,39 @@ export function MealPlanGenerator() {
           </Card>
         )}
 
+        {/* 空状態の表示 */}
+        {!mealSuggestions && !isGenerating && !error && (
+          <ThemedView style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>
+              {selectedItems.length === 0 ? '🍎' : '🍳'}
+            </Text>
+            <Text style={styles.emptyTitle}>
+              {selectedItems.length === 0
+                ? '食材を選択してください'
+                : '献立を生成しましょう'}
+            </Text>
+            <Text style={styles.emptyDescription}>
+              {selectedItems.length === 0
+                ? '上部のタブから食材を選んで\n献立を作成できます'
+                : '「選択した食材で献立を作成」ボタンを\nタップしてください'}
+            </Text>
+          </ThemedView>
+        )}
+
         {mealSuggestions && (
           <ThemedView style={styles.mealsContainer}>
-            <Text variant="headlineSmall" style={styles.mealsTitle}>
-              📋 提案された献立
-            </Text>
+            <ThemedView style={styles.mealsHeaderRow}>
+              <Text variant="headlineSmall" style={styles.mealsTitle}>
+                📋 提案された献立
+              </Text>
+              <IconButton
+                icon="trash-can"
+                iconColor="#E53935"
+                size={24}
+                onPress={handleClearMealPlan}
+                style={styles.deleteMealButton}
+              />
+            </ThemedView>
 
             {/* 主菜 */}
             <Card style={styles.mealCard}>
@@ -631,10 +687,20 @@ const styles = StyleSheet.create({
   mealsContainer: {
     marginTop: 16,
   },
+  mealsHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   mealsTitle: {
     fontWeight: 'bold',
-    marginBottom: 8,
     color: '#E65100',
+    flex: 1,
+  },
+  deleteMealButton: {
+    borderColor: '#E53935',
+    borderWidth: 1.5,
   },
   mealsSubtitle: {
     color: '#666',
@@ -805,5 +871,28 @@ const styles = StyleSheet.create({
     borderColor: '#FF5252',
     borderWidth: 1,
     marginTop: 8,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 24,
+  },
+  emptyIcon: {
+    fontSize: 80,
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptyDescription: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });
