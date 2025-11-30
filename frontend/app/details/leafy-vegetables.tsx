@@ -59,8 +59,6 @@ export default function LeafyVegetableDetailScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="葉物野菜" subtitle="種類別詳細情報" />
-        <Appbar.Action icon="heart-outline" onPress={() => console.log('お気に入り')} />
-        <Appbar.Action icon="shopping" onPress={() => console.log('買い物リストに追加')} />
       </Appbar.Header>
 
       <ScrollView

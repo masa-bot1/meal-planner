@@ -18,7 +18,6 @@ export default function SeasoningCategoryScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="調味料・その他" subtitle="料理の味付けアイテム" />
-        <Appbar.Action icon="plus" onPress={() => console.log('追加')} />
       </Appbar.Header>
 
       <SelectedItemsDisplay />

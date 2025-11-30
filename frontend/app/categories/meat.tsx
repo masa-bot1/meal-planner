@@ -18,7 +18,6 @@ export default function MeatCategoryScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="肉類" subtitle="お肉・魚類の管理" />
-        <Appbar.Action icon="plus" onPress={() => console.log('追加')} />
       </Appbar.Header>
 
       <SelectedItemsDisplay />

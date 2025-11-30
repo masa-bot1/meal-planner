@@ -18,7 +18,6 @@ export default function VegetableCategoryScreen() {
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title="野菜類" subtitle="新鮮な野菜の管理" />
-        <Appbar.Action icon="plus" onPress={() => console.log('追加')} />
       </Appbar.Header>
 
       <SelectedItemsDisplay />
