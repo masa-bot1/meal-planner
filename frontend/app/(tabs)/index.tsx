@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native';
 import {
   Button,
   Card,
-  Text,
 } from 'react-native-paper';
 import { router } from 'expo-router';
 
@@ -25,13 +24,10 @@ export default function HomeScreen() {
       <Card style={styles.categoryCard}>
         <Card.Title
           title="食材カテゴリ"
-          subtitle="食材を種類別に管理しましょう"
+          subtitle="食材を選択してください"
           titleStyle={styles.cardTitle}
         />
         <Card.Content style={styles.categoryContent}>
-          <Text variant="bodyMedium" style={styles.categoryDescription}>
-            食材を分類して効率的に管理できます
-          </Text>
 
           <ThemedView style={styles.categoryButtons}>
             <Button

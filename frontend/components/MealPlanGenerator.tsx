@@ -400,7 +400,7 @@ export function MealPlanGenerator() {
                           icon="play"
                           compact
                         >
-                          YouTube検索
+                          YouTube
                         </Button>
                       )}
                       {mealSuggestions.main_dish.recipe_links.website && (
@@ -411,7 +411,7 @@ export function MealPlanGenerator() {
                           icon="web"
                           compact
                         >
-                          Google検索
+                          Google
                         </Button>
                       )}
                     </ThemedView>
@@ -489,7 +489,7 @@ export function MealPlanGenerator() {
                           icon="play"
                           compact
                         >
-                          YouTube検索
+                          YouTube
                         </Button>
                       )}
                       {mealSuggestions.side_dish.recipe_links.website && (
@@ -500,7 +500,7 @@ export function MealPlanGenerator() {
                           icon="web"
                           compact
                         >
-                          Google検索
+                          Google
                         </Button>
                       )}
                     </ThemedView>
@@ -578,7 +578,7 @@ export function MealPlanGenerator() {
                           icon="play"
                           compact
                         >
-                          YouTube検索
+                          YouTube
                         </Button>
                       )}
                       {mealSuggestions.soup.recipe_links.website && (
@@ -589,7 +589,7 @@ export function MealPlanGenerator() {
                           icon="web"
                           compact
                         >
-                          Google検索
+                          Google
                         </Button>
                       )}
                     </ThemedView>

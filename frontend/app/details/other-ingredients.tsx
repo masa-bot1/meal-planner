@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     color: '#9E9E9E',
   },
   description: {
-    textAlign: 'center',
+    textAlign: 'left',
     color: '#666',
     marginBottom: 16,
   },

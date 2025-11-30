@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     color: '#F57C00',
   },
   description: {
-    textAlign: 'center',
+    textAlign: 'left',
     color: '#666',
     marginBottom: 16,
   },
