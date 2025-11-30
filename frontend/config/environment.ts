@@ -9,7 +9,7 @@ export const ENV_CONFIG = {
   api: {
     // Rails API ベースURL
     baseUrl: __DEV__
-      ? 'http://localhost:3001/api/v1'  // 開発環境: ローカルのRailsサーバー
+      ? 'http://192.168.40.53:3001/api/v1'  // 開発環境: ローカルのRailsサーバー（実機からアクセス可能）
       : 'https://your-production-api.com/api/v1', // 本番環境
 
     // タイムアウト設定（ミリ秒）
