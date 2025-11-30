@@ -1,11 +1,11 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { Card, Chip } from 'react-native-paper';
+import { Card, Chip, IconButton } from 'react-native-paper';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
 
 export function SelectedItemsDisplay() {
-  const { selectedItems, removeItem } = useSelectedItems();
+  const { selectedItems, removeItem, clearAll } = useSelectedItems();
 
   if (selectedItems.length === 0) {
     return null;
@@ -16,6 +16,14 @@ export function SelectedItemsDisplay() {
       <Card.Title
         title="🛒 選択中の食材"
         titleStyle={styles.selectedTitle}
+        right={(props) => (
+          <IconButton
+            icon="delete-sweep"
+            iconColor="#D32F2F"
+            size={24}
+            onPress={clearAll}
+          />
+        )}
       />
       <Card.Content>
         <ThemedView style={styles.selectedContainer}>
