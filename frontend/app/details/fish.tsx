@@ -1,5 +1,5 @@
 import { StyleSheet, ScrollView } from 'react-native';
-import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
+import { Appbar, Card, Text, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
@@ -124,17 +124,6 @@ export default function FishDetailScreen() {
               />
             </Card>
           ))}
-
-          <ThemedView style={styles.actionContainer}>
-            <Button
-              mode="contained"
-              icon="plus"
-              style={styles.addButton}
-              onPress={() => console.log('新しい魚種類を追加')}
-            >
-              カスタム魚種を追加
-            </Button>
-          </ThemedView>
         </ThemedView>
       </ScrollView>
     </ThemedView>

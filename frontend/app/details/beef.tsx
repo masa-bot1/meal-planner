@@ -1,5 +1,5 @@
 import { StyleSheet, ScrollView } from 'react-native';
-import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
+import { Appbar, Card, Text, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
@@ -106,17 +106,6 @@ export default function BeefDetailScreen() {
               />
             </Card>
           ))}
-
-          <ThemedView style={styles.actionContainer}>
-            <Button
-              mode="contained"
-              icon="plus"
-              style={styles.addButton}
-              onPress={() => console.log('新しい牛肉部位を追加')}
-            >
-              カスタム部位を追加
-            </Button>
-          </ThemedView>
         </ThemedView>
       </ScrollView>
     </ThemedView>
@@ -218,12 +207,6 @@ const styles = StyleSheet.create({
   },
   methodChipText: {
     fontSize: 10,
-  },
-  actionContainer: {
-    padding: 16,
-  },
-  addButton: {
-    backgroundColor: '#FF5722',
   },
   selectedCard: {
     margin: 16,

@@ -1,5 +1,5 @@
 import { StyleSheet, ScrollView } from 'react-native';
-import { Appbar, Card, Text, Button, List, Chip } from 'react-native-paper';
+import { Appbar, Card, Text, List, Chip } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { useSelectedItems } from '@/contexts/SelectedItemsContext';
@@ -118,17 +118,6 @@ export default function OtherIngredientsDetailScreen() {
               />
             </Card>
           ))}
-
-          <ThemedView style={styles.actionContainer}>
-            <Button
-              mode="contained"
-              icon="plus"
-              style={styles.addButton}
-              onPress={() => console.log('新しい食材を追加')}
-            >
-              カスタム食材を追加
-            </Button>
-          </ThemedView>
         </ThemedView>
       </ScrollView>
     </ThemedView>

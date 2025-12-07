@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Appbar, Button, List } from 'react-native-paper';
+import { Appbar, List } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
@@ -37,17 +37,6 @@ export default function MeatCategoryScreen() {
             style={styles.listItem}
           />
         ))}
-
-        <ThemedView style={styles.addButtonContainer}>
-          <Button
-            mode="contained"
-            icon="plus"
-            style={styles.addButton}
-            onPress={() => console.log('新しい肉類を追加')}
-          >
-            新しい食材を追加
-          </Button>
-        </ThemedView>
       </ThemedView>
     </ThemedView>
   );
