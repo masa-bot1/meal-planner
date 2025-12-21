@@ -12,6 +12,7 @@ export function MealPlanGenerator() {
   const { selectedItems } = useSelectedItems();
   const [mealSuggestions, setMealSuggestions] = useState<ApiMealSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState<'main_dish' | 'side_dish' | 'soup' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -219,6 +220,65 @@ export function MealPlanGenerator() {
     );
   };
 
+  // 個別の料理を再生成
+  const regenerateSingleDish = async (dishType: 'main_dish' | 'side_dish' | 'soup') => {
+    if (!mealSuggestions) return;
+
+    setIsRegenerating(dishType);
+    setError(null);
+
+    try {
+      const dishNames = {
+        main_dish: '主菜',
+        side_dish: '副菜',
+        soup: '汁物'
+      };
+
+      console.log(`${dishNames[dishType]}を再生成中...`);
+
+      const response = await MealPlanAPI.regenerateDish({
+        dishType,
+        ingredients: selectedItems,
+        currentDishes: {
+          main_dish: mealSuggestions.main_dish.name,
+          side_dish: mealSuggestions.side_dish.name,
+          soup: mealSuggestions.soup.name
+        },
+        preferences: {
+          meal_type: '夕食',
+          cuisine_type: '和食'
+        }
+      });
+
+      if (response.success && response.data) {
+        // 献立を更新（他の料理はそのまま）
+        const updatedMealPlan = {
+          ...mealSuggestions,
+          [dishType]: response.data.new_dish
+        };
+
+        setMealSuggestions(updatedMealPlan);
+        console.log(`${dishNames[dishType]}を再生成しました:`, response.data.new_dish.name);
+
+        // 更新した献立を保存
+        try {
+          const ingredientNames = selectedItems.map(item => item.name);
+          await saveMealPlan(ingredientNames, updatedMealPlan);
+          console.log('更新した献立を保存しました');
+        } catch (saveError) {
+          console.error('献立の保存に失敗:', saveError);
+        }
+      } else {
+        setError(response.message || `${dishNames[dishType]}の再生成に失敗しました`);
+      }
+    } catch (err) {
+      console.error('再生成エラー:', err);
+      setError('料理の再生成中にエラーが発生しました');
+    } finally {
+      setIsRegenerating(null);
+    }
+  };
+
   // 初回読み込み中の表示
   if (isLoadingFromStorage) {
     return (
@@ -357,14 +417,31 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🍖 主菜: {mealSuggestions.main_dish.name}
                   </Text>
-                  <Chip
-                    mode="outlined"
-                    style={styles.categoryChip}
-                    compact={false}
-                  >
-                    主菜
-                  </Chip>
+                  <ThemedView style={styles.mealHeaderActions}>
+                    <Chip
+                      mode="outlined"
+                      style={styles.categoryChip}
+                      compact={false}
+                    >
+                      主菜
+                    </Chip>
+                    <IconButton
+                      icon="refresh"
+                      size={20}
+                      iconColor="#FF9800"
+                      onPress={() => regenerateSingleDish('main_dish')}
+                      disabled={isRegenerating !== null}
+                      style={styles.regenerateButton}
+                    />
+                  </ThemedView>
                 </ThemedView>
+
+                {isRegenerating === 'main_dish' && (
+                  <ThemedView style={styles.regeneratingIndicator}>
+                    <ActivityIndicator size="small" color="#FF9800" />
+                    <Text style={styles.regeneratingText}>再生成中...</Text>
+                  </ThemedView>
+                )}
 
                 <ThemedView style={styles.mealInfoRow}>
                   <Chip
@@ -446,14 +523,31 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🥗 副菜: {mealSuggestions.side_dish.name}
                   </Text>
-                  <Chip
-                    mode="outlined"
-                    style={styles.categoryChip}
-                    compact={false}
-                  >
-                    副菜
-                  </Chip>
+                  <ThemedView style={styles.mealHeaderActions}>
+                    <Chip
+                      mode="outlined"
+                      style={styles.categoryChip}
+                      compact={false}
+                    >
+                      副菜
+                    </Chip>
+                    <IconButton
+                      icon="refresh"
+                      size={20}
+                      iconColor="#FF9800"
+                      onPress={() => regenerateSingleDish('side_dish')}
+                      disabled={isRegenerating !== null}
+                      style={styles.regenerateButton}
+                    />
+                  </ThemedView>
                 </ThemedView>
+
+                {isRegenerating === 'side_dish' && (
+                  <ThemedView style={styles.regeneratingIndicator}>
+                    <ActivityIndicator size="small" color="#FF9800" />
+                    <Text style={styles.regeneratingText}>再生成中...</Text>
+                  </ThemedView>
+                )}
 
                 <ThemedView style={styles.mealInfoRow}>
                   <Chip
@@ -535,14 +629,31 @@ export function MealPlanGenerator() {
                   <Text variant="titleMedium" style={styles.mealName}>
                     🍲 汁物: {mealSuggestions.soup.name}
                   </Text>
-                  <Chip
-                    mode="outlined"
-                    style={styles.categoryChip}
-                    compact={false}
-                  >
-                    汁物
-                  </Chip>
+                  <ThemedView style={styles.mealHeaderActions}>
+                    <Chip
+                      mode="outlined"
+                      style={styles.categoryChip}
+                      compact={false}
+                    >
+                      汁物
+                    </Chip>
+                    <IconButton
+                      icon="refresh"
+                      size={20}
+                      iconColor="#FF9800"
+                      onPress={() => regenerateSingleDish('soup')}
+                      disabled={isRegenerating !== null}
+                      style={styles.regenerateButton}
+                    />
+                  </ThemedView>
                 </ThemedView>
+
+                {isRegenerating === 'soup' && (
+                  <ThemedView style={styles.regeneratingIndicator}>
+                    <ActivityIndicator size="small" color="#FF9800" />
+                    <Text style={styles.regeneratingText}>再生成中...</Text>
+                  </ThemedView>
+                )}
 
                 <ThemedView style={styles.mealInfoRow}>
                   <Chip
@@ -718,6 +829,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  mealHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   mealName: {
     fontWeight: 'bold',
     color: '#2E7D32',
@@ -727,6 +843,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#E8F5E8',
     minHeight: 32,
     paddingVertical: 4,
+  },
+  regenerateButton: {
+    margin: 0,
+  },
+  regeneratingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 4,
+  },
+  regeneratingText: {
+    color: '#FF9800',
+    fontSize: 12,
   },
   mealDescription: {
     color: '#666',

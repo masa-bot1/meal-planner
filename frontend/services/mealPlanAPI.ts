@@ -323,6 +323,102 @@ export class MealPlanAPI {
   }
 
   /**
+   * 特定の料理（主菜/副菜/汁物）を再生成
+   * @param params 再生成パラメータ
+   * @returns 再生成された料理
+   */
+  static async regenerateDish(params: {
+    dishType: 'main_dish' | 'side_dish' | 'soup';
+    ingredients: { name: string; category: string }[];
+    currentDishes: {
+      main_dish: string;
+      side_dish: string;
+      soup: string;
+    };
+    preferences?: {
+      cuisine_type?: string;
+      meal_type?: string;
+      dietary_restrictions?: string[];
+    };
+  }): Promise<{
+    success: boolean;
+    data?: {
+      dish_type: string;
+      new_dish: ApiDishSuggestion;
+      generated_at: string;
+    };
+    message?: string;
+  }> {
+    try {
+      logAPI('info', '料理再生成開始', { 
+        dishType: params.dishType,
+        ingredientsCount: params.ingredients.length 
+      });
+
+      const requestBody = {
+        regenerate: {
+          dish_type: params.dishType,
+          ingredients: params.ingredients,
+          current_dishes: params.currentDishes,
+          preferences: params.preferences || {}
+        }
+      };
+
+      logAPI('info', 'Rails API送信データ（再生成）', requestBody);
+
+      const response = await this.fetchWithRetry(
+        `${API_CONFIG.baseUrl}/meal_plans/regenerate_dish`,
+        {
+          method: 'POST',
+          headers: API_CONFIG.headers,
+          body: JSON.stringify(requestBody),
+        },
+        2
+      );
+
+      logAPI('info', 'Rails APIレスポンス状態（再生成）', { 
+        status: response.status, 
+        statusText: response.statusText 
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        logAPI('error', 'Rails APIエラーレスポンス（再生成）', { 
+          status: response.status, 
+          errorText 
+        });
+
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { message: '料理の再生成に失敗しました' };
+        }
+
+        return {
+          success: false,
+          message: errorData.message
+        };
+      }
+
+      const responseData = await response.json();
+      logAPI('info', 'Rails API成功レスポンス（再生成）', responseData);
+
+      return responseData;
+
+    } catch (error) {
+      logAPI('error', 'Rails API呼び出し例外（再生成）', error);
+
+      const errorInfo = classifyError(error);
+
+      return {
+        success: false,
+        message: errorInfo.message
+      };
+    }
+  }
+
+  /**
    * API接続テスト
    * @returns 接続状態
    */

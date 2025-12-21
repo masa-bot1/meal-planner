@@ -36,6 +36,32 @@ class MealPlanService
     end
   end
 
+  # 特定の料理（主菜/副菜/汁物）のみを再生成
+  def regenerate_single_dish(dish_type:, current_dishes:)
+    begin
+      return error_response('料理タイプが指定されていません') if dish_type.blank?
+      return error_response('現在の献立が指定されていません') if current_dishes.blank?
+
+      # OpenAI API を使用した料理再生成
+      if Rails.application.config.openai[:api_key].present?
+        new_dish = regenerate_dish_with_openai(dish_type, current_dishes)
+      else
+        Rails.logger.warn "OpenAI API key not configured, using mock regeneration"
+        new_dish = generate_mock_dish(dish_type)
+      end
+
+      {
+        success: true,
+        new_dish: new_dish
+      }
+    rescue StandardError => e
+      Rails.logger.error "Dish regeneration error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+
+      error_response('料理の再生成中にエラーが発生しました')
+    end
+  end
+
   private
 
   def generate_with_openai
@@ -212,6 +238,152 @@ class MealPlanService
       youtube: "https://www.youtube.com/results?search_query=#{encoded_youtube}",
       website: "https://www.google.com/search?q=#{encoded_google}"
     }
+  end
+
+  def regenerate_dish_with_openai(dish_type, current_dishes)
+    client = OpenAI::Client.new(
+      access_token: Rails.application.config.openai[:api_key],
+      log_errors: !Rails.env.production?
+    )
+
+    system_prompt = build_regenerate_system_prompt(dish_type)
+    user_prompt = build_regenerate_user_prompt(dish_type, current_dishes)
+
+    response = client.chat(
+      parameters: {
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: system_prompt },
+          { role: "user", content: user_prompt }
+        ],
+        temperature: 0.9
+      }
+    )
+
+    parse_single_dish_response(response, dish_type)
+  rescue OpenAI::Error => e
+    Rails.logger.error "OpenAI API error during regeneration: #{e.message}"
+    generate_mock_dish(dish_type)
+  rescue StandardError => e
+    Rails.logger.error "Unexpected error in regenerate_dish_with_openai: #{e.message}"
+    generate_mock_dish(dish_type)
+  end
+
+  def build_regenerate_system_prompt(dish_type)
+    dish_definitions = {
+      'main_dish' => {
+        name: '主菜',
+        description: 'メインとなるタンパク質源の料理（肉、魚、卵、豆腐などを使った料理）',
+        examples: '生姜焼き、鶏の唐揚げ、鮭の塩焼き、麻婆豆腐、ハンバーグなど'
+      },
+      'side_dish' => {
+        name: '副菜',
+        description: '野菜を中心とした料理やサブのおかず',
+        examples: 'ほうれん草のおひたし、きんぴらごぼう、野菜サラダ、切り干し大根、ひじきの煮物など'
+      },
+      'soup' => {
+        name: '汁物',
+        description: '汁やスープ類の料理',
+        examples: '味噌汁、豚汁、すまし汁、けんちん汁、わかめスープ、コンソメスープなど'
+      }
+    }
+
+    dish_info = dish_definitions[dish_type]
+
+    <<~PROMPT
+      あなたは日本の家庭料理に詳しい料理アシスタントです。
+      現在の献立の#{dish_info[:name]}だけを別の料理に変更してください。
+
+      #{dish_info[:name]}の定義:
+      #{dish_info[:description]}
+      例: #{dish_info[:examples]}
+
+      必ず#{dish_info[:name]}に該当する料理を提案してください。
+      他の料理とのバランスを考慮してください。
+
+      以下の形式でJSONレスポンスを返してください：
+      {
+        "name": "料理名",
+        "ingredients": ["食材1", "食材2"],
+        "cooking_time": "調理時間（分）",
+        "calories": "カロリー（kcal）"
+      }
+
+      注意事項：
+      - #{dish_info[:name]}に該当する料理のみを提案してください
+      - 提供された食材を可能な限り使用してください
+      - 他の料理と重複しない料理を提案してください
+      - 栄養バランスを考慮してください
+      - 料理名は検索しやすい一般的な名称を使用してください
+    PROMPT
+  end
+
+  def build_regenerate_user_prompt(dish_type, current_dishes)
+    ingredient_names = ingredients.map { |ing| ing.is_a?(Hash) ? ing[:name] || ing['name'] : ing.to_s }
+    ingredient_list = ingredient_names.join(', ')
+
+    dish_names = {
+      'main_dish' => '主菜',
+      'side_dish' => '副菜',
+      'soup' => '汁物'
+    }
+
+    current_main = current_dishes[:main_dish] || current_dishes['main_dish']
+    current_side = current_dishes[:side_dish] || current_dishes['side_dish']
+    current_soup = current_dishes[:soup] || current_dishes['soup']
+
+    <<~PROMPT
+      現在の献立:
+      - 主菜: #{current_main}
+      - 副菜: #{current_side}
+      - 汁物: #{current_soup}
+
+      #{dish_names[dish_type]}だけを別の料理に変更してください。
+      使用食材: #{ingredient_list}
+    PROMPT
+  end
+
+  def parse_single_dish_response(response, dish_type)
+    content = response.dig("choices", 0, "message", "content")
+
+    json_match = content.match(/```json\n(.*?)\n```/m)
+    json_content = json_match ? json_match[1] : content
+
+    parsed_data = JSON.parse(json_content)
+    format_dish(parsed_data)
+  rescue JSON::ParserError => e
+    Rails.logger.error "Failed to parse dish regeneration response: #{e.message}"
+    generate_mock_dish(dish_type)
+  end
+
+  def generate_mock_dish(dish_type)
+    ingredient_name = ingredients.first.is_a?(Hash) ? 
+      (ingredients.first[:name] || ingredients.first['name']) : 
+      ingredients.first.to_s
+
+    dishes = {
+      'main_dish' => {
+        name: "#{ingredient_name}のグリル",
+        ingredients: [ingredient_name, "オリーブオイル", "ハーブ"],
+        cooking_time: "20分",
+        calories: "250kcal"
+      },
+      'side_dish' => {
+        name: "季節野菜のサラダ",
+        ingredients: ["レタス", "トマト", ingredient_name],
+        cooking_time: "10分",
+        calories: "80kcal"
+      },
+      'soup' => {
+        name: "#{ingredient_name}のスープ",
+        ingredients: [ingredient_name, "玉ねぎ", "コンソメ"],
+        cooking_time: "15分",
+        calories: "100kcal"
+      }
+    }
+
+    dish = dishes[dish_type] || dishes['main_dish']
+    format_dish(dish)
   end
 
   def generate_meal_suggestions

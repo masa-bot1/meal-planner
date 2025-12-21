@@ -12,6 +12,7 @@ Rails.application.routes.draw do
       resources :meal_plans, only: [] do
         collection do
           post :generate
+          post :regenerate_dish
         end
       end
     end
