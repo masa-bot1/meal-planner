@@ -13,12 +13,15 @@ export function MealPlanGenerator() {
   const [mealSuggestions, setMealSuggestions] = useState<ApiMealSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState<'main_dish' | 'side_dish' | 'soup' | null>(null);
+  const [selectedPreference, setSelectedPreference] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [isLoadingFromStorage, setIsLoadingFromStorage] = useState(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const preferences = ['楽チン', 'ヘルシー', 'ボリューミー', '節約', '筋トレ'];
 
   // アプリ起動時に保存された献立を読み込む
   useEffect(() => {
@@ -118,8 +121,9 @@ export function MealPlanGenerator() {
       const response = await MealPlanAPI.generateMealPlan({
         ingredients: selectedItems,
         preferences: {
-          meal_type: '夕食', // デフォルト設定
-          cuisine_type: '和食' // デフォルト設定
+          preference: selectedPreference || undefined,
+          meal_type: '夕食',
+          cuisine_type: '和食'
         }
       });
 
@@ -299,6 +303,31 @@ export function MealPlanGenerator() {
         titleStyle={styles.cardTitle}
       />
       <Card.Content>
+        {/* テーマ選択 */}
+        <ThemedView style={styles.preferenceSection}>
+          <Text variant="titleSmall" style={styles.preferenceSectionTitle}>
+            🎯 テーマを選択
+          </Text>
+          <ThemedView style={styles.preferenceChips}>
+            {preferences.map((pref) => (
+              <Chip
+                key={pref}
+                selected={selectedPreference === pref}
+                showSelectedCheck={false}
+                onPress={() => setSelectedPreference(selectedPreference === pref ? null : pref)}
+                style={[
+                  styles.preferenceChip,
+                  selectedPreference === pref && styles.preferenceChipSelected
+                ]}
+                textStyle={selectedPreference === pref ? styles.preferenceChipTextSelected : undefined}
+                mode={selectedPreference === pref ? 'flat' : 'outlined'}
+              >
+                {pref}
+              </Chip>
+            ))}
+          </ThemedView>
+        </ThemedView>
+
         <ThemedView style={styles.buttonContainer}>
           <Button
             mode="contained"
@@ -762,6 +791,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#F57C00',
+  },
+  preferenceSection: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  preferenceSectionTitle: {
+    fontWeight: 'bold',
+    color: '#424242',
+    marginBottom: 12,
+  },
+  preferenceChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  preferenceChip: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#FF9800',
+  },
+  preferenceChipSelected: {
+    backgroundColor: '#FF9800',
+  },
+  preferenceChipTextSelected: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
   buttonContainer: {
     marginBottom: 16,

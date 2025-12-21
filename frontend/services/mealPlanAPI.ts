@@ -29,6 +29,7 @@ interface MealPlanRequest {
       category: string;
     }[];
     preferences?: {
+      preference?: string; // 楽チン、ヘルシー、ボリューミー、節約、筋トレ
       cuisine_type?: string; // 和食、洋食、中華など
       dietary_restrictions?: string[]; // ベジタリアン、グルテンフリーなど
       meal_type?: string; // 朝食、昼食、夕食
@@ -230,6 +231,7 @@ export class MealPlanAPI {
   static async generateMealPlan(request: {
     ingredients: { name: string; category: string }[];
     preferences?: {
+      preference?: string;
       cuisine_type?: string;
       dietary_restrictions?: string[];
       meal_type?: string;
