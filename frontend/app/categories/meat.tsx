@@ -11,6 +11,7 @@ export default function MeatCategoryScreen() {
     { id: 3, name: '鶏肉', description: 'むね肉・もも肉・ささみなど', icon: 'bird', route: 'chicken' },
     { id: 4, name: 'ひき肉', description: '牛・豚・鶏のひき肉', icon: 'food-steak', route: 'ground-meat' },
     { id: 5, name: '魚類', description: 'サーモン・マグロ・サバなど', icon: 'fish', route: 'fish' },
+    { id: 6, name: '卵', description: '卵', icon: 'egg', route: 'eggs' },
   ];
 
   return (
@@ -23,7 +24,7 @@ export default function MeatCategoryScreen() {
       <SelectedItemsDisplay />
 
       <ThemedView style={styles.listContainer}>
-        {meatItems.slice(0, 5).map((item) => (
+        {meatItems.map((item) => (
           <List.Item
             key={item.id}
             title={item.name}
