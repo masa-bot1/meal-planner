@@ -10,6 +10,7 @@ import { ThemedView } from '@/components/ThemedView';
 import MealPlannerHeaderImage from '@/components/MealPlannerHeaderImage';
 import { SelectedItemsDisplay } from '@/components/SelectedItemsDisplay';
 import { MealPlanGenerator } from '@/components/MealPlanGenerator';
+import { GenreSelector } from '@/components/GenreSelector';
 
 export default function HomeScreen() {
   return (
@@ -19,6 +20,9 @@ export default function HomeScreen() {
 
       {/* 選択中の食材表示 */}
       <SelectedItemsDisplay />
+
+      {/* ジャンル選択 */}
+      <GenreSelector />
 
       {/* 食材カテゴリカード */}
       <Card style={styles.categoryCard}>

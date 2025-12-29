@@ -5,18 +5,23 @@ export interface SelectedItem {
   category: string;
 }
 
+export type CuisineGenre = '和風' | '洋風' | '中華' | 'エスニック' | '多国籍';
+
 interface SelectedItemsContextType {
   selectedItems: SelectedItem[];
   addItem: (item: SelectedItem) => void;
   removeItem: (itemName: string) => void;
   clearAll: () => void;
   isSelected: (itemName: string) => boolean;
+  selectedGenre: CuisineGenre | null;
+  setSelectedGenre: (genre: CuisineGenre | null) => void;
 }
 
 const SelectedItemsContext = createContext<SelectedItemsContextType | undefined>(undefined);
 
 export function SelectedItemsProvider({ children }: { children: ReactNode }) {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
+  const [selectedGenre, setSelectedGenre] = useState<CuisineGenre | null>(null);
 
   const addItem = (item: SelectedItem) => {
     setSelectedItems(prev => {
@@ -45,6 +50,8 @@ export function SelectedItemsProvider({ children }: { children: ReactNode }) {
     removeItem,
     clearAll,
     isSelected,
+    selectedGenre,
+    setSelectedGenre,
   };
 
   return (

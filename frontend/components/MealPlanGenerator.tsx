@@ -9,7 +9,7 @@ import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
 export function MealPlanGenerator() {
-  const { selectedItems } = useSelectedItems();
+  const { selectedItems, selectedGenre } = useSelectedItems();
   const [mealSuggestions, setMealSuggestions] = useState<ApiMealSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState<'main_dish' | 'side_dish' | 'soup' | null>(null);
@@ -28,9 +28,16 @@ export function MealPlanGenerator() {
     const loadSavedMealPlan = async () => {
       try {
         const savedData = await loadMealPlan();
-        if (savedData) {
-          setMealSuggestions(savedData.mealPlan);
-          console.log('保存された献立を読み込みました:', savedData.createdAt);
+        if (savedData && savedData.mealPlan) {
+          // 献立データの構造を検証
+          const mealPlan = savedData.mealPlan;
+          if (mealPlan.main_dish && mealPlan.side_dish && mealPlan.soup) {
+            setMealSuggestions(mealPlan);
+            console.log('保存された献立を読み込みました:', savedData.createdAt);
+          } else {
+            console.warn('保存された献立のデータ構造が不正です。クリアします。');
+            await clearMealPlan();
+          }
         }
       } catch (error) {
         console.error('献立の読み込みエラー:', error);
@@ -123,7 +130,7 @@ export function MealPlanGenerator() {
         preferences: {
           preference: selectedPreference || undefined,
           meal_type: '夕食',
-          cuisine_type: '和食'
+          cuisine_type: selectedGenre || undefined
         }
       });
 
@@ -250,30 +257,47 @@ export function MealPlanGenerator() {
         },
         preferences: {
           meal_type: '夕食',
-          cuisine_type: '和食'
+          cuisine_type: selectedGenre || undefined
         }
       });
 
-      if (response.success && response.data) {
-        // 献立を更新（他の料理はそのまま）
-        const updatedMealPlan = {
-          ...mealSuggestions,
-          [dishType]: response.data.new_dish
-        };
+      console.log('再生成API レスポンス:', response);
 
-        setMealSuggestions(updatedMealPlan);
-        console.log(`${dishNames[dishType]}を再生成しました:`, response.data.new_dish.name);
-
-        // 更新した献立を保存
-        try {
-          const ingredientNames = selectedItems.map(item => item.name);
-          await saveMealPlan(ingredientNames, updatedMealPlan);
-          console.log('更新した献立を保存しました');
-        } catch (saveError) {
-          console.error('献立の保存に失敗:', saveError);
-        }
-      } else {
+      if (!response.success) {
         setError(response.message || `${dishNames[dishType]}の再生成に失敗しました`);
+        return;
+      }
+
+      if (!response.data) {
+        console.error('レスポンスにdataが含まれていません:', response);
+        setError(`${dishNames[dishType]}の再生成に失敗しました（レスポンスエラー）`);
+        return;
+      }
+
+      if (!response.data.new_dish) {
+        console.error('レスポンスのdataにnew_dishが含まれていません:', response.data);
+        setError(`${dishNames[dishType]}の再生成に失敗しました（データエラー）`);
+        return;
+      }
+
+      console.log('新しい料理:', response.data.new_dish);
+        
+      // 献立を更新（他の料理はそのまま）
+      const updatedMealPlan = {
+        ...mealSuggestions,
+        [dishType]: response.data.new_dish
+      };
+
+      setMealSuggestions(updatedMealPlan);
+      console.log(`${dishNames[dishType]}を再生成しました:`, response.data.new_dish.name);
+
+      // 更新した献立を保存
+      try {
+        const ingredientNames = selectedItems.map(item => item.name);
+        await saveMealPlan(ingredientNames, updatedMealPlan);
+        console.log('更新した献立を保存しました');
+      } catch (saveError) {
+        console.error('献立の保存に失敗:', saveError);
       }
     } catch (err) {
       console.error('再生成エラー:', err);
@@ -424,7 +448,7 @@ export function MealPlanGenerator() {
           </ThemedView>
         )}
 
-        {mealSuggestions && (
+        {mealSuggestions && mealSuggestions.main_dish && mealSuggestions.side_dish && mealSuggestions.soup && (
           <ThemedView style={styles.mealsContainer}>
             <ThemedView style={styles.mealsHeaderRow}>
               <Text variant="headlineSmall" style={styles.mealsTitle}>
