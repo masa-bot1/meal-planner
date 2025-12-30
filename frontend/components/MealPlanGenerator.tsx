@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Animated, Alert } from 'react-native';
 import { Button, Card, Text, Chip, ActivityIndicator, ProgressBar, IconButton } from 'react-native-paper';
 import { ThemedView } from '@/components/ThemedView';
-import { useSelectedItems } from '@/contexts/SelectedItemsContext';
+import { useSelectedItems, CuisineGenre } from '@/contexts/SelectedItemsContext';
 import { MealPlanAPI, ApiMealSuggestions } from '@/services/mealPlanAPI';
 import { saveMealPlan, loadMealPlan, clearMealPlan } from '@/services/storageService';
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
 
 export function MealPlanGenerator() {
-  const { selectedItems, selectedGenre } = useSelectedItems();
+  const { selectedItems, selectedGenre, setSelectedGenre } = useSelectedItems();
   const [mealSuggestions, setMealSuggestions] = useState<ApiMealSuggestions | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState<'main_dish' | 'side_dish' | 'soup' | null>(null);
@@ -327,6 +327,38 @@ export function MealPlanGenerator() {
         titleStyle={styles.cardTitle}
       />
       <Card.Content>
+        {/* ジャンル選択 */}
+        <ThemedView style={styles.preferenceSection}>
+          <Text variant="titleSmall" style={styles.preferenceSectionTitle}>
+            🌍 ジャンルを選択
+          </Text>
+          <ThemedView style={styles.preferenceChips}>
+            {([
+              { label: '和風' as CuisineGenre, icon: 'rice', color: '#8BC34A' },
+              { label: '洋風' as CuisineGenre, icon: 'silverware-fork-knife', color: '#FF9800' },
+              { label: '中華' as CuisineGenre, icon: 'bowl-mix', color: '#F44336' },
+              { label: 'エスニック' as CuisineGenre, icon: 'chili-hot', color: '#FF5722' },
+              { label: '多国籍' as CuisineGenre, icon: 'earth', color: '#2196F3' },
+            ]).map((genre) => (
+              <Chip
+                key={genre.label}
+                icon={genre.icon}
+                selected={selectedGenre === genre.label}
+                showSelectedCheck={false}
+                onPress={() => setSelectedGenre(selectedGenre === genre.label ? null : genre.label)}
+                style={[
+                  styles.preferenceChip,
+                  selectedGenre === genre.label && { backgroundColor: genre.color }
+                ]}
+                textStyle={selectedGenre === genre.label ? styles.preferenceChipTextSelected : undefined}
+                mode={selectedGenre === genre.label ? 'flat' : 'outlined'}
+              >
+                {genre.label}
+              </Chip>
+            ))}
+          </ThemedView>
+        </ThemedView>
+
         {/* テーマ選択 */}
         <ThemedView style={styles.preferenceSection}>
           <Text variant="titleSmall" style={styles.preferenceSectionTitle}>
